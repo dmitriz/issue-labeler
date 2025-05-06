@@ -65,6 +65,10 @@ async function main() {
 
   } catch (error) {
     console.error('Error:', error.message);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', JSON.stringify(error.response.data, null, 2));
+    }
   }
 }
 
