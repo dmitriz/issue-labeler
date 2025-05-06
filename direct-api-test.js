@@ -4,10 +4,9 @@ const { token, owner, repo } = require('./.secrets/github');
 console.log('========== CONFIGURATION ==========');
 console.log(`Owner: ${owner}`);
 console.log(`Repo: ${repo}`);
-console.log(`Token (first 10 chars): ${token.substring(0, 10)}...`);
+console.log(`Token: [REDACTED]`);
 console.log(`Full URL: https://api.github.com/repos/${owner}/${repo}/issues`);
 console.log('==================================');
-
 // Using a simple axios call directly
 axios.get(`https://api.github.com/repos/${owner}/${repo}/issues`, {
   headers: { 
