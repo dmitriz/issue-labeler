@@ -17,6 +17,13 @@ axios.get(`https://api.github.com/repos/${owner}/${repo}/issues`, {
 })
 .then(response => {
   console.log('SUCCESS! Status:', response.status);
+
+  // Check for pagination
+  const linkHeader = response.headers.link;
+  if (linkHeader) {
+    console.log('Pagination detected - only showing first page of results');
+  }
+
   console.log(`Found ${response.data.length} issues`);
   if (response.data.length > 0) {
     console.log('First issue:', {
