@@ -8,6 +8,7 @@ const { token, owner, repo } = require('../.secrets/github');
 const BASE_URL = 'https://api.github.com';
 
 // Create an axios instance with default configuration
+const https = require('https');
 const github = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -15,7 +16,8 @@ const github = axios.create({
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'issue-labeler-app'
   },
-  timeout: 5000 // 5 second timeout
+  timeout: 5000, // 5 second timeout
+  httpsAgent: new https.Agent({ keepAlive: true })
 });
 
 /**
