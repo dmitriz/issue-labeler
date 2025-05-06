@@ -33,11 +33,8 @@ async function fetchIssues({ state = 'open', labels = '' }) {
     });
     return res.data;
   } catch (error) {
-    console.error('Error fetching issues:', error.message);
+    console.error(`Error fetching issues for ${owner}/${repo}: ${error.message} - URL: ${error.config.url}`);
     if (error.response) {
-      console.error('API Error:', error.response.status, error.response.statusText);
-      console.error('Error details:', error.response.data);
-    }
     throw error;
   }
 }
