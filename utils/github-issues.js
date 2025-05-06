@@ -9,7 +9,7 @@ const axios = require('axios');
 const token = process.env.GITHUB_TOKEN || (
   (() => {
     try {
-      return require('../.secrets/github-token').token;
+      return require('../.secrets/github').token;
     } catch (e) {
       console.warn('GitHub token file not found. Please set GITHUB_TOKEN environment variable.');
       return '';
