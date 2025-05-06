@@ -30,10 +30,18 @@ process.on('uncaughtException', (error) => {
     }
 
     console.log(`Adding label to issue #${targetIssue.number}...`);
-    await addLabelsToIssue({ issue_number: targetIssue.number, labels: ['test-label'] });
+    // Add a uniquely identifiable test label
+    const testLabel = `test-label-${Date.now()}`;
+    await addLabelsToIssue({ issue_number: targetIssue.number, labels: [testLabel] });
     
     console.log(`Adding comment to issue #${targetIssue.number}...`);
-    await commentOnIssue({ issue_number: targetIssue.number, body: 'Label added via API test ✅' });
+    await commentOnIssue({ 
+      issue_number: targetIssue.number, 
+      body: `Label ${testLabel} added via API test ✅ [${new Date().toISOString()}]` 
+    });
+    
+    // TODO: Add cleanup for test labels if GitHub API supports removing labels
+    // (would require implementing a removeLabelsFromIssue function in the API wrapper)
 
     console.log('Label and comment added.');
   } catch (error) {
