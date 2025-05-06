@@ -4,7 +4,12 @@ This tool automatically suggests urgency and importance labels for GitHub issues
 
 ## Usage
 
-You can run the labeler in two ways:
+## Usage
+
+First, install the dependencies:
+
+```bash
+npm install
 
 ```bash
 # Directly with Node.js
