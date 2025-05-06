@@ -16,5 +16,4 @@ npm install
 node labeler.js
 
 # Using NPM script
-npm run label
-```
+npm start
