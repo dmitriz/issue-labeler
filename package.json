@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node labeler.js",
-    "test:github-model": "node test-github-model.js"
+    "test:github-model": "node test-github-model.js",
+    "example:github-issues": "node example-github-issues.js"
   },
   "repository": {
     "type": "git",
