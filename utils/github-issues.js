@@ -4,7 +4,18 @@
  */
 
 const axios = require('axios');
-const { token } = require('../.secrets/github-token');
+
+// Try to get token from environment variable first, fall back to file if available
+const token = process.env.GITHUB_TOKEN || (
+  (() => {
+    try {
+      return require('../.secrets/github-token').token;
+    } catch (e) {
+      console.warn('GitHub token file not found. Please set GITHUB_TOKEN environment variable.');
+      return '';
+    }
+  })()
+);
 
 const BASE_URL = 'https://api.github.com';
 
