@@ -51,8 +51,14 @@ async function processIssue() {
     try {
       const parsedResponse = JSON.parse(response);
       console.log("\n=== Suggested Labels ===\n");
-      console.log(`urgency: ${parsedResponse.urgency}`);
-      console.log(`importance: ${parsedResponse.importance}`);
+      console.log(`urgency: ${parsedResponse.urgency || 'not specified'}`);
+      console.log(`importance: ${parsedResponse.importance || 'not specified'}`);
+      
+      // Validate required properties
+      if (!parsedResponse.urgency || !parsedResponse.importance) {
+        console.warn("Warning: Response is missing required fields (urgency and/or importance)");
+      }
+      
       return parsedResponse;
     } catch (error) {
       console.error("Error parsing JSON response:", error.message);
