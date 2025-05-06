@@ -84,7 +84,12 @@ async function commentOnIssue({ issue_number, body }) {
     return res.data;
   } catch (error) {
     console.error(`Error commenting on issue #${issue_number} for ${owner}/${repo}: ${error.message} - URL: ${error.config.url}`);
+    if (error.response) {
+      console.error('API Error:', error.response.status, error.response.statusText);
+      console.error('Error details:', error.response.data);
+    }
     throw error;
+  }
 }
 
 async function retry(fn, options = {}) {
