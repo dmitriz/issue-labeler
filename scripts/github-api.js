@@ -74,9 +74,8 @@ async function commentOnIssue({ issue_number, body }) {
     );
     return res.data;
   } catch (error) {
-    console.error(`Error commenting on issue #${issue_number}:`, error.message);
+    console.error(`Error commenting on issue #${issue_number} for ${owner}/${repo}: ${error.message} - URL: ${error.config.url}`);
     throw error;
-  }
 }
 
 module.exports = {
