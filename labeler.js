@@ -2,9 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const { callGithubModel } = require('./lib/githubModel');
 
 // Load the prompt template and config
-const promptTemplate = fs.readFileSync('prompt-template.txt', 'utf-8');
+const promptTemplate = fs.readFileSync('prompts/label-template.txt', 'utf-8');
 try {
   const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 } catch (error) {
@@ -30,16 +31,36 @@ const issue = (() => {
   };
 })();
 
-// Replace placeholders in the template
-const prompt = promptTemplate
-  .replace('{{title}}', issue.title)
-  .replace('{{body}}', issue.body);
+// Replace placeholders in the template and format the prompt
+const prompt = `${promptTemplate}\n\nIssue Title: ${issue.title}\n\nIssue Body: ${issue.body}`;
 
-// Output what would be sent to the model
+// Output what will be sent to the model
 console.log("=== Prompt Sent to Model ===\n");
 console.log(prompt);
 
-// Simulate model response (replace this with real API later)
-console.log("\n=== Suggested Labels ===\n");
-console.log("urgency: urgent");
-console.log("importance: high");
+// Call the GitHub model API
+async function processIssue() {
+  try {
+    const response = await callGithubModel({ prompt });
+    
+    console.log("\n=== Response from GitHub Model ===\n");
+    console.log(response);
+    
+    // Try to parse the response as JSON
+    try {
+      const parsedResponse = JSON.parse(response);
+      console.log("\n=== Suggested Labels ===\n");
+      console.log(`urgency: ${parsedResponse.urgency}`);
+      console.log(`importance: ${parsedResponse.importance}`);
+      return parsedResponse;
+    } catch (error) {
+      console.error("Error parsing JSON response:", error.message);
+      console.log("Raw response:", response);
+    }
+  } catch (error) {
+    console.error("Error calling GitHub model:", error);
+  }
+}
+
+// Execute the issue processing
+processIssue().catch(console.error);
