@@ -1,5 +1,14 @@
 const axios = require('axios');
-const { token, owner, repo } = require('./.secrets/github');
+let token, owner, repo;
+try {
+  ({ token, owner, repo } = require('./.secrets/github'));
+  if (!token || !owner || !repo) {
+    throw new Error('Missing required GitHub credentials');
+  }
+} catch (error) {
+  console.error('Error loading GitHub credentials:', error.message);
+  process.exit(1);
+}
 
 console.log('========== CONFIGURATION ==========');
 console.log(`Owner: ${owner}`);
