@@ -5,7 +5,16 @@ console.log('==== COMMENT TEST STARTED ====');
 // Make the async function and call it immediately
 (async function() {
   try {
-    const issue_number = 2; // The "Configure Renovate" issue we found
+    // Get the first open issue from the fetchIssues function
+    const { fetchIssues } = require('./scripts/github-api');
+    const issues = await fetchIssues({ state: 'open' });
+    
+    if (issues.length === 0) {
+      console.log('No open issues found. Skipping comment test.');
+      return;
+    }
+    
+    const issue_number = issues[0].number;
     console.log(`Attempting to add comment to issue #${issue_number}...`);
     
     const result = await commentOnIssue({ 
