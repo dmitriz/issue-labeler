@@ -6,8 +6,12 @@ const githubIssues = require('./utils/github-issues');
 
 async function main() {
   // Configuration for the target repository
-  const owner = 'dmitriz';
-  const repo = 'issue-labeler';
+  // Configuration for the target repository
+  const owner = process.env.GITHUB_OWNER || 'dmitriz';
+  const repo = process.env.GITHUB_REPO || 'issue-labeler';
+
+  console.log(`Using repository: ${owner}/${repo}`);
+  console.log('(Set GITHUB_OWNER and GITHUB_REPO environment variables to use a different repository)');
 
   try {
     console.log('Fetching open issues...');
