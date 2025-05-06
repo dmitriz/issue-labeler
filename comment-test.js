@@ -1,0 +1,31 @@
+const { commentOnIssue } = require('./scripts/github-api');
+
+console.log('==== COMMENT TEST STARTED ====');
+
+// Make the async function and call it immediately
+(async function() {
+  try {
+    const issue_number = 2; // The "Configure Renovate" issue we found
+    console.log(`Attempting to add comment to issue #${issue_number}...`);
+    
+    const result = await commentOnIssue({ 
+      issue_number, 
+      body: 'Comment added via API test ✅' 
+    });
+    
+    console.log('Success! Comment added:', {
+      id: result.id,
+      url: result.html_url,
+      created_at: result.created_at,
+      body: result.body
+    });
+    console.log('==== TEST COMPLETED SUCCESSFULLY ====');
+  } catch (error) {
+    console.error('==== TEST FAILED ====');
+    console.error('Error message:', error.message);
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', JSON.stringify(error.response.data, null, 2));
+    }
+  }
+})();

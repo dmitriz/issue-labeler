@@ -1,0 +1,43 @@
+const axios = require('axios');
+const { token, owner, repo } = require('./.secrets/github');
+
+console.log('========== CONFIGURATION ==========');
+console.log(`Owner: ${owner}`);
+console.log(`Repo: ${repo}`);
+console.log(`Token (first 10 chars): ${token.substring(0, 10)}...`);
+console.log(`Full URL: https://api.github.com/repos/${owner}/${repo}/issues`);
+console.log('==================================');
+
+// Using a simple axios call directly
+axios.get(`https://api.github.com/repos/${owner}/${repo}/issues`, {
+  headers: { 
+    Authorization: `token ${token}`,  // Using 'token' prefix instead of 'Bearer'
+    'User-Agent': 'issue-labeler-app'
+  },
+  timeout: 5000 // 5 second timeout
+})
+.then(response => {
+  console.log('SUCCESS! Status:', response.status);
+  console.log(`Found ${response.data.length} issues`);
+  if (response.data.length > 0) {
+    console.log('First issue:', {
+      number: response.data[0].number,
+      title: response.data[0].title,
+      state: response.data[0].state
+    });
+  }
+})
+.catch(error => {
+  console.error('ERROR!');
+  console.error('Message:', error.message);
+  
+  if (error.response) {
+    console.error('Status:', error.response.status);
+    console.error('Status Text:', error.response.statusText);
+    console.error('Data:', JSON.stringify(error.response.data, null, 2));
+  } else if (error.request) {
+    console.error('Request was made but no response was received');
+  } else {
+    console.error('Error setting up request:', error.message);
+  }
+});
