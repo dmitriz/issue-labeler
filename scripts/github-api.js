@@ -4,6 +4,9 @@
  */
 const axios = require('axios');
 const { token, owner, repo } = require('../.secrets/github');
+if (!token || !owner || !repo) {
+  throw new Error('Missing GitHub configuration: token, owner, and repo are required');
+}
 
 const BASE_URL = 'https://api.github.com';
 
