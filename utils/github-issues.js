@@ -33,6 +33,11 @@ if (!token) {
   console.warn('GitHub token is not set. API calls will likely fail due to authentication issues.');
 }
 
+// Check if token is present
+if (!token) {
+  console.warn('GitHub token is not set. API calls will likely fail due to authentication issues.');
+}
+
 /**
  * List issues in a repository
  * @param {Object} params - Parameters object
