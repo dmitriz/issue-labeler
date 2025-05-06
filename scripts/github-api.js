@@ -54,9 +54,8 @@ async function addLabelsToIssue({ issue_number, labels }) {
     );
     return res.data;
   } catch (error) {
-    console.error(`Error adding labels to issue #${issue_number}:`, error.message);
+    console.error(`Error adding labels to issue #${issue_number} for ${owner}/${repo}: ${error.message} - URL: ${error.config.url}`);
     throw error;
-  }
 }
 
 /**
