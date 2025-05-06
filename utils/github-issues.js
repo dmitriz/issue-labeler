@@ -159,7 +159,7 @@ async function addLabels({ owner, repo, issue_number, labels }) {
  * @param {string} params.repo - Repository name
  * @param {number} params.issue_number - Issue number
  * @param {string} params.name - Label name to remove
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} True if the label was successfully removed
  */
 async function removeLabel({ owner, repo, issue_number, name }) {
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/labels/${encodeURIComponent(name)}`;
