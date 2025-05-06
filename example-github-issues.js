@@ -23,10 +23,9 @@ async function main() {
     if (issues.length > 0) {
       const firstIssue = issues[0];
       console.log('\nFirst issue details:');
-      console.log(`#${firstIssue.number}: ${firstIssue.title}`);
-      console.log(`Labels: ${firstIssue.labels.map(l => l.name).join(', ') || 'None'}`);
-      console.log(`Created by: ${firstIssue.user.login}`);
-      
+      console.log(`#${firstIssue.number || 'unknown'}: ${firstIssue.title || 'No title'}`);
+      console.log(`Labels: ${firstIssue.labels ? firstIssue.labels.map(l => l.name || 'unknown').join(', ') : 'None'}`);
+      console.log(`Created by: ${firstIssue.user?.login || 'unknown user'}`);
       // Fetch comments for this issue
       console.log('\nFetching comments for this issue...');
       const comments = await githubIssues.listComments({
