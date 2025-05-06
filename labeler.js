@@ -6,8 +6,9 @@ const { callGithubModel } = require('./lib/githubModel');
 
 // Load the prompt template and config
 const promptTemplate = fs.readFileSync('prompts/label-template.txt', 'utf-8');
+let config;
 try {
-  const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+  config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 } catch (error) {
   console.error("Failed to read config.json:", error);
   process.exit(1); // Exit the process to prevent further execution

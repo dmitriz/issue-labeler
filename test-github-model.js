@@ -4,6 +4,15 @@ const fs = require('fs');
 const path = require('path');
 const { callGithubModel } = require('./lib/githubModel');
 
+function validateIssue(issue) {
+  if (!issue.title || typeof issue.title !== 'string') {
+    throw new Error('Invalid issue: title must be a non-empty string');
+  }
+  if (!issue.body || typeof issue.body !== 'string') {
+    throw new Error('Invalid issue: body must be a non-empty string');
+  }
+}
+
 // Load the label template
 const labelTemplate = fs.readFileSync('prompts/label-template.txt', 'utf-8');
 
@@ -27,6 +36,18 @@ async function testGithubModelIntegration() {
     console.log("\n=== Response from GitHub Model ===\n");
     console.log(response);
     
+    // Include raw response in the error message for better debugging
+    try {
+      const parsedResponse = JSON.parse(response);
+      console.log("\n=== Parsed Labels ===\n");
+      console.log(`urgency: ${parsedResponse.urgency}`);
+      console.log(`importance: ${parsedResponse.importance}`);
+      console.log("\n=== Parsed Labels ===\n");
+      console.log(`urgency: ${parsedResponse.urgency}`);
+      console.log(`importance: ${parsedResponse.importance}`);
+    } catch (error) {
+      console.error("Error parsing JSON response:", error.message, "Raw response:", response);
+    }
     // Try to parse the response as JSON
     try {
       const parsedResponse = JSON.parse(response);
