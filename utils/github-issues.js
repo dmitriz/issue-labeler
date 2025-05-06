@@ -204,17 +204,17 @@ async function addLabels({ owner, repo, issue_number, labels }) {
     console.error('Error adding labels:', error.response?.data || error.message);
     console.error(`Error adding labels: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
+  async function removeLabel({ owner, repo, issue_number, name }) {
+    const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/labels/${encodeURIComponent(name)}`;
+  
+    try {
+      await axios.delete(url, { headers });
+      return true;
+    } catch (error) {
+      console.error('Error removing label:', error.response?.data || error.message);
+      throw new Error(`Failed to remove label: ${error.response?.data?.message || error.message}`);
+    }
   }
-}
-
-/**
- * Remove a label from an issue
- * @param {Object} params - Parameters object
- * @param {string} params.owner - Repository owner
- * @param {string} params.repo - Repository name
- * @param {number} params.issue_number - Issue number
- * @param {string} params.name - Label name to remove
- * @returns {Promise<boolean>} True if the label was successfully removed
  */
 async function removeLabel({ owner, repo, issue_number, name }) {
   // Validate required parameters
