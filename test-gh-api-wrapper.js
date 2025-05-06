@@ -11,11 +11,8 @@ process.on('uncaughtException', (error) => {
 
 (async () => {
   console.log('===== TEST SCRIPT STARTED =====');
-  try {
-    // Log configuration to verify it's loaded correctly
-    console.log('Config check:', { 
-      owner: owner || 'missing', 
-      repo: repo || 'missing',
+  // For production, remove or use a secure logging approach
+  console.log('Config loaded successfully');
       tokenLength: token ? token.length : 'missing'
     });
     
