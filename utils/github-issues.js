@@ -49,7 +49,7 @@ async function listIssues({ owner, repo, state = 'open', labels = '', sort = 'cr
     const response = await axios.get(url, { headers, params });
     return response.data;
   } catch (error) {
-    console.error('Error listing issues:', error.response?.data || error.message);
+    console.error(`Error listing issues: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -69,7 +69,7 @@ async function getIssue({ owner, repo, issue_number }) {
     const response = await axios.get(url, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error getting issue:', error.response?.data || error.message);
+    console.error(`Error getting issue: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -93,7 +93,7 @@ async function createIssue({ owner, repo, title, body, labels = [], assignees = 
     const response = await axios.post(url, data, { headers });
     return response.data;
   } catch (error) {
-    console.error('Error creating issue:', error.response?.data || error.message);
+    console.error(`Error creating issue: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -115,7 +115,6 @@ async function updateIssue({ owner, repo, issue_number, title, body, state, labe
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}`;
   const data = {};
   
-  // Only include properties that are provided
   if (title !== undefined) data.title = title;
   if (body !== undefined) data.body = body;
   if (state !== undefined) data.state = state;
@@ -127,6 +126,7 @@ async function updateIssue({ owner, repo, issue_number, title, body, state, labe
     return response.data;
   } catch (error) {
     console.error('Error updating issue:', error.response?.data || error.message);
+    console.error(`Error updating issue: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -148,6 +148,7 @@ async function addLabels({ owner, repo, issue_number, labels }) {
     return response.data;
   } catch (error) {
     console.error('Error adding labels:', error.response?.data || error.message);
+    console.error(`Error adding labels: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -169,6 +170,7 @@ async function removeLabel({ owner, repo, issue_number, name }) {
     return true;
   } catch (error) {
     console.error('Error removing label:', error.response?.data || error.message);
+    console.error(`Error removing label: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -190,6 +192,7 @@ async function commentOnIssue({ owner, repo, issue_number, body }) {
     return response.data;
   } catch (error) {
     console.error('Error creating comment:', error.response?.data || error.message);
+    console.error(`Error creating comment: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
@@ -210,6 +213,7 @@ async function listComments({ owner, repo, issue_number }) {
     return response.data;
   } catch (error) {
     console.error('Error listing comments:', error.response?.data || error.message);
+    console.error(`Error listing comments: ${error.response?.status} - ${error.response?.data || error.message}`);
     throw error;
   }
 }
