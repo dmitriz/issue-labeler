@@ -51,6 +51,17 @@ async function testGithubModelIntegration() {
     // Try to parse the response as JSON
     try {
       const parsedResponse = JSON.parse(response);
+      
+      // Validate response structure
+      if (
+        !parsedResponse.hasOwnProperty('urgency') ||
+        !parsedResponse.hasOwnProperty('importance')
+      ) {
+        console.error("Invalid response format: missing required keys");
+        console.log("Raw response:", response);
+        return;
+      }
+
       console.log("\n=== Parsed Labels ===\n");
       console.log(`urgency: ${parsedResponse.urgency}`);
       console.log(`importance: ${parsedResponse.importance}`);
