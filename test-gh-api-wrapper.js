@@ -4,7 +4,9 @@ const { token, owner, repo } = require('./.secrets/github');
 // Set up process error handling
 process.on('uncaughtException', (error) => {
   console.error('UNCAUGHT EXCEPTION:', error);
+  // Optionally, perform cleanup or retry logic here
   process.exit(1);
+});
 });
 
 (async () => {
