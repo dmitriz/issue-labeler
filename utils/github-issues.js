@@ -52,6 +52,15 @@ if (!token) {
  * @returns {Promise<Array>} Array of issue objects
  */
 async function listIssues({ owner, repo, state = 'open', labels = '', sort = 'created', direction = 'desc', per_page = 30, page = 1 }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  
+  // Validate state parameter if provided
+  if (state && !['open', 'closed', 'all'].includes(state)) {
+    throw new Error('Parameter "state" must be one of: open, closed, all');
+  }
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues`;
   
   // Format labels if it's an array
@@ -84,6 +93,12 @@ async function listIssues({ owner, repo, state = 'open', labels = '', sort = 'cr
  * @returns {Promise<Object>} Issue object
  */
 async function getIssue({ owner, repo, issue_number }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}`;
   
   try {
@@ -133,6 +148,17 @@ async function createIssue({ owner, repo, title, body, labels = [], assignees = 
  * @returns {Promise<Object>} Updated issue object
  */
 async function updateIssue({ owner, repo, issue_number, title, body, state, labels, assignees }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  
+  // Validate state parameter if provided
+  if (state !== undefined && !['open', 'closed'].includes(state)) {
+    throw new Error('Parameter "state" must be one of: open, closed');
+  }
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}`;
   const data = {};
   
@@ -162,6 +188,13 @@ async function updateIssue({ owner, repo, issue_number, title, body, state, labe
  * @returns {Promise<Array>} Array of labels
  */
 async function addLabels({ owner, repo, issue_number, labels }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  if (!labels || !Array.isArray(labels)) throw new Error('Parameter "labels" must be an array');
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/labels`;
   
   try {
@@ -184,6 +217,13 @@ async function addLabels({ owner, repo, issue_number, labels }) {
  * @returns {Promise<boolean>} True if the label was successfully removed
  */
 async function removeLabel({ owner, repo, issue_number, name }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  if (!name) throw new Error('Parameter "name" is required');
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/labels/${encodeURIComponent(name)}`;
   
   try {
@@ -206,6 +246,13 @@ async function removeLabel({ owner, repo, issue_number, name }) {
  * @returns {Promise<Object>} Comment object
  */
 async function commentOnIssue({ owner, repo, issue_number, body }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  if (!body) throw new Error('Parameter "body" is required');
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/comments`;
   
   try {
@@ -227,6 +274,12 @@ async function commentOnIssue({ owner, repo, issue_number, body }) {
  * @returns {Promise<Array>} Array of comment objects
  */
 async function listComments({ owner, repo, issue_number }) {
+  // Validate required parameters
+  if (!owner) throw new Error('Parameter "owner" is required');
+  if (!repo) throw new Error('Parameter "repo" is required');
+  if (issue_number === undefined) throw new Error('Parameter "issue_number" is required');
+  if (typeof issue_number !== 'number') throw new Error('Parameter "issue_number" must be a number');
+  
   const url = `${BASE_URL}/repos/${owner}/${repo}/issues/${issue_number}/comments`;
   
   try {
