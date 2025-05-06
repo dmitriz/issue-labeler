@@ -7,12 +7,12 @@ process.on('uncaughtException', (error) => {
   // Optionally, perform cleanup or retry logic here
   process.exit(1);
 });
-});
 
 (async () => {
-  console.log('===== TEST SCRIPT STARTED =====');
-  // For production, remove or use a secure logging approach
-  console.log('Config loaded successfully');
+  try {
+    console.log('===== TEST SCRIPT STARTED =====');
+    // For production, remove or use a secure logging approach
+    console.log('Config loaded successfully', {
       tokenLength: token ? token.length : 'missing'
     });
     
