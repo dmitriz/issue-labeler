@@ -5,7 +5,12 @@ const path = require('path');
 
 // Load the prompt template and config
 const promptTemplate = fs.readFileSync('prompt-template.txt', 'utf-8');
-const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+try {
+  const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+} catch (error) {
+  console.error("Failed to read config.json:", error);
+  process.exit(1); // Exit the process to prevent further execution
+}
 
 // Parse command line arguments or use dummy data if none provided
 const issue = (() => {
