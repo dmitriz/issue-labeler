@@ -7,11 +7,23 @@ const path = require('path');
 const promptTemplate = fs.readFileSync('prompt-template.txt', 'utf-8');
 const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
 
-// Dummy issue data for now
-const issue = {
-  title: "Enable automatic triage with GitHub models",
-  body: "We want to assign urgency and importance labels automatically to issues based on content. This will help prioritize work and remove bottlenecks."
-};
+// Parse command line arguments or use dummy data if none provided
+const issue = (() => {
+  // Check if issue data is provided via command line
+  if (process.argv.length > 2) {
+    try {
+      return JSON.parse(process.argv[2]);
+    } catch (error) {
+      console.error('Error parsing issue data:', error.message);
+    }
+  }
+
+  // Fall back to dummy data
+  return {
+    title: "Enable automatic triage with GitHub models",
+    body: "We want to assign urgency and importance labels automatically to issues based on content. This will help prioritize work and remove bottlenecks."
+  };
+})();
 
 // Replace placeholders in the template
 const prompt = promptTemplate
