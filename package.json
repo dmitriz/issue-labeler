@@ -1,0 +1,21 @@
+{
+  "name": "issue-labeler",
+  "version": "1.0.0",
+  "description": "This tool automatically suggests urgency and importance labels for GitHub issues using a lightweight prompt-based script. It will be extended to use GitHub Models API.",
+  "main": "labeler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node labeler.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmitriz/issue-labeler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dmitriz/issue-labeler/issues"
+  },
+  "homepage": "https://github.com/dmitriz/issue-labeler#readme"
+}
