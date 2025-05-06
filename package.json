@@ -4,9 +4,17 @@
   "description": "This tool automatically suggests urgency and importance labels for GitHub issues using a lightweight prompt-based script. It will be extended to use GitHub Models API.",
   "main": "labeler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Running all tests...\" && npm run test:config && npm run test:github-model && npm run test:gh-api && npm run test:minimal",
     "start": "node labeler.js",
     "test:github-model": "node test-github-model.js",
+    "test:gh-api": "node test-gh-api-wrapper.js",
+    "test:config": "node test-config.js",
+    "test:label": "node label-test.js",
+    "test:comment": "node comment-test.js",
+    "test:fetch": "node fetch-only-test.js",
+    "test:minimal": "node minimal-test.js",
+    "test:direct-api": "node direct-api-test.js",
+    "test:simple": "node simple-gh-api-test.js",
     "example:github-issues": "node example-github-issues.js"
   },
   "repository": {
