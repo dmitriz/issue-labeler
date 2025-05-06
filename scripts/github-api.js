@@ -82,8 +82,25 @@ async function commentOnIssue({ issue_number, body }) {
     throw error;
 }
 
+async function retry(fn, options = {}) {
+  const { retries = 3, delay = 500 } = options;
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
+}
+
 module.exports = {
   fetchIssues,
   addLabelsToIssue,
   commentOnIssue,
+  retry
 };
