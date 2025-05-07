@@ -8,6 +8,7 @@ const { getIssueContent, applyLabels } = require('./lib/github-wrapper');
 const { callModel } = require('./lib/github-model');
 const fs = require('fs');
 const path = require('path');
+const { Command } = require('commander');
 
 // Read the prompt template
 const promptTemplate = fs.readFileSync(path.join(__dirname, 'prompt-template.txt'), 'utf8');
@@ -58,24 +59,31 @@ async function main({ issueNumber, owner, repo }) {
 
 // Parse command-line arguments
 if (require.main === module) {
-  const args = process.argv.slice(2);
-  const issueNumber = parseInt(args[0], 10);
-  
-  // Set default repository info or get from command line if provided
-  const owner = args[1] || 'dmitriz';
-  const repo = args[2] || 'issue-labeler';
+  const program = new Command();
 
-  if (!issueNumber) {
-    console.error('Usage: node label-issue.js <issue-number> [owner] [repo]');
-    process.exit(1);
-  }
+  program
+    .name('label-issue')
+    .description('Automatically label GitHub issues based on their content')
+    .argument('<issue-number>', 'The issue number to process')
+    .option('-o, --owner <owner>', 'Repository owner', 'dmitriz')
+    .option('-r, --repo <repo>', 'Repository name', 'issue-labeler')
+    .action(async (issueNumber, options) => {
+      const issueNum = parseInt(issueNumber, 10);
+      if (isNaN(issueNum)) {
+        console.error('Error: <issue-number> must be a valid number');
+        process.exit(1);
+      }
 
-  main({ issueNumber, owner, repo })
-    .then(() => console.log('Issue labeling process completed successfully'))
-    .catch(err => {
-      console.error('Fatal error:', err.message);
-      process.exit(1);
+      try {
+        await main({ issueNumber: issueNum, owner: options.owner, repo: options.repo });
+        console.log('Issue labeling process completed successfully');
+      } catch (err) {
+        console.error('Fatal error:', err.message);
+        process.exit(1);
+      }
     });
+
+  program.parse(process.argv);
 }
 
 module.exports = { main };
