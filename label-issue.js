@@ -29,9 +29,9 @@ promptTemplate = await fs.promises.readFile(path.join(__dirname, 'prompt-templat
  * @param {Object} options - Options object
  * @param {number} options.issueNumber - The issue number to process
  * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- */
-async function main({ issueNumber, owner, repo }) {
+ const prompt = promptTemplate
+   .replace(/\{\{title\}\}/g, issue.title)
+   .replace(/\{\{body\}\}/g, issue.body || '');
   console.log(`Processing issue #${issueNumber} from ${owner}/${repo}...`);
   
   try {
