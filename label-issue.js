@@ -11,7 +11,18 @@ const path = require('path');
 const { Command } = require('commander');
 
 // Read the prompt template
-const promptTemplate = fs.readFileSync(path.join(__dirname, 'prompt-template.txt'), 'utf8');
+// Remove the synchronous file read at the top of the file.
+// Inside the async main function (at its start), add:
+const promptTemplate = await fs.promises.readFile(path.join(__dirname, 'prompt-template.txt'), 'utf8');
+let promptTemplate;
+try {
+  promptTemplate = fs.readFileSync(promptTemplatePath, 'utf8');
+} catch (error) {
+  console.error(`Error reading prompt template: ${error.message}`);
+  process.exit(1);
+}
+// Inside the async main function (at its start), add:
+promptTemplate = await fs.promises.readFile(path.join(__dirname, 'prompt-template.txt'), 'utf8');
 
 /**
  * Main function to process and label an issue
@@ -44,6 +55,10 @@ async function main({ issueNumber, owner, repo }) {
     if (urgency) labels.push(urgency);
     if (importance) labels.push(importance);
 
+    if (labels.length === 0) {
+      console.warn(`No labels determined for issue #${issueNumber}.`);
+    }
+
     if (labels.length > 0) {
       console.log(`Applying labels to issue #${issueNumber}: ${labels.join(', ')}...`);
       await applyLabels({ issueNumber, owner, repo, labels });
@@ -52,7 +67,7 @@ async function main({ issueNumber, owner, repo }) {
       console.warn('No valid labels were determined. No labels applied to the issue.');
     }
   } catch (error) {
-    console.error(`Error processing issue #${issueNumber}: ${error.message}`);
+    console.error(`Error processing issue #${issueNumber}:`, error);
     process.exit(1);
   }
 }
