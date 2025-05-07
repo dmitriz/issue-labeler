@@ -10,10 +10,12 @@ For urgency, consider:
 For importance, consider:
 - "high": Issues impacting core functionality or user experience
 - "low": Nice-to-have improvements or minor bugs with workarounds
-Return a YAML block in this format:
+Return a JSON object in this format:
 
-urgency: <urgent | not urgent>
-importance: <high | low>
+{
+  "urgency": "<urgent | not urgent>",
+  "importance": "<high | low>"
+}
 
 Issue:
 Title: {{title}}
