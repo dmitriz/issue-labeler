@@ -10,7 +10,12 @@ const { getAllOpenIssues, getIssuesWithLabel } = require('../lib/github');
 async function selectNext() {
   // Get all open issues
   let issues = await getAllOpenIssues();
-  
+  const URGENT_PRIORITY_SCORE = 0;
+  const NORMAL_PRIORITY_SCORE = 10;
+
+  // Example usage of these constants (if needed in the future logic)
+  const getPriorityScore = (hasUrgentLabel) => 
+    hasUrgentLabel ? URGENT_PRIORITY_SCORE : NORMAL_PRIORITY_SCORE;
   if (!issues.length) {
     return console.log('No open issues available for processing.');
   }
