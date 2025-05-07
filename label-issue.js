@@ -59,7 +59,7 @@ async function main({ issueNumber, owner, repo }) {
 // Parse command-line arguments
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const issueNumber = args[0];
+  const issueNumber = parseInt(args[0], 10);
   
   // Set default repository info or get from command line if provided
   const owner = args[1] || 'dmitriz';
