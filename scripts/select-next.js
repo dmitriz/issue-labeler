@@ -2,41 +2,44 @@ const { getAllOpenIssues, getIssuesWithLabel } = require('../lib/github');
 
 /**
  * Select the next issue to work on based on priority rules:
- * 1. Pick most recent issue with "urgent" label
- * 2. If no urgent issues, pick most recent issue
- * 3. Only show "no issues" message if there are no open issues at all
+ * 1. Filter by urgent label if available
+ * 2. From resulting list, filter by important label if available
+ * 3. Pick most recently updated issue from final list
+ * 4. If no open issues, show appropriate message
  */
 async function selectNext() {
   // Get all open issues
-  const allIssues = await getAllOpenIssues();
+  let issues = await getAllOpenIssues();
   
-  if (!allIssues.length) {
-    return console.log('No open issues found in the repository.');
+  if (!issues.length) {
+    return console.log('No open issues available for processing.');
   }
 
-  // First try to find urgent issues
-  const urgentIssues = getIssuesWithLabel(allIssues, 'urgent');
-  
+  // Filter step 1 (Urgency):
+  const urgentIssues = getIssuesWithLabel(issues, 'urgent');
   if (urgentIssues.length) {
-    // Sort urgent issues by creation date (most recent first)
-    const sortedUrgent = urgentIssues.sort((a, b) => 
-      new Date(b.created_at) - new Date(a.created_at)
-    );
-    
-    const top = sortedUrgent[0];
-    return console.log(`Next best issue (urgent):\n#${top.number}: ${top.title}\n${top.html_url}`);
+    console.log(`Found ${urgentIssues.length} issues with 'urgent' label. Prioritizing these.`);
+    issues = urgentIssues;
   }
   
-  // No urgent issues found, use most recent issue
-  console.log('No issues labeled "urgent" found. Taking most recent open issue instead.');
+  // Filter step 2 (Importance):
+  const importantIssues = getIssuesWithLabel(issues, 'important');
+  if (importantIssues.length) {
+    console.log(`Found ${importantIssues.length} issues with 'important' label from current filtered set. Prioritizing these.`);
+    issues = importantIssues;
+  }
   
-  // Sort all issues by creation date (most recent first)
-  const sortedAll = allIssues.sort((a, b) => 
-    new Date(b.created_at) - new Date(a.created_at)
+  // Final selection - sort by updated_at (most recent first)
+  const sortedIssues = issues.sort((a, b) => 
+    new Date(b.updated_at) - new Date(a.updated_at)
   );
   
-  const top = sortedAll[0];
-  console.log(`Next issue (most recent):\n#${top.number}: ${top.title}\n${top.html_url}`);
+  const top = sortedIssues[0];
+  console.log(`\nSelected issue (most recently updated):`);
+  console.log(`#${top.number}: ${top.title}`);
+  console.log(`URL: ${top.html_url}`);
+  console.log(`Last updated: ${new Date(top.updated_at).toLocaleString()}`);
+  console.log(`Labels: ${top.labels.map(l => l.name).join(', ') || 'none'}`);
 }
 
 selectNext().catch(err => {
