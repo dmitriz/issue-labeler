@@ -1,20 +1,16 @@
 const { getLabeledIssues } = require('../lib/github');
-const priorities = { urgency: ['today', 'someday'], importance: ['high', 'low'] };
 
 /**
- * Calculate priority score for an issue based on its urgency and importance labels
+ * Calculate priority score for an issue based on its urgent label
  * Lower scores indicate higher priority
  * @param {Object} issue - GitHub issue object
  * @returns {number} - Priority score
  */
 function score(issue) {
-  const urgency = issue.labels.find(l => l.name.startsWith('urgency:'))?.name.split(':')[1] || 'someday';
-  const importance = issue.labels.find(l => l.name.startsWith('importance:'))?.name.split(':')[1] || 'low';
-
-  const urgencyScore = priorities.urgency.indexOf(urgency);
-  const importanceScore = priorities.importance.indexOf(importance);
-
-  return urgencyScore * 10 + importanceScore;
+  // If issue has urgent label, give it highest priority (score 0)
+  const hasUrgentLabel = issue.labels.some(l => l.name === 'urgent');
+  
+  return hasUrgentLabel ? 0 : 10; // 0 for urgent issues, 10 for others
 }
 
 /**
