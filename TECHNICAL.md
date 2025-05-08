@@ -13,6 +13,7 @@ This document provides comprehensive technical documentation for the GitHub Issu
 7. [Main Workflows](#main-workflows)
 8. [Testing](#testing)
 9. [How to Extend](#how-to-extend)
+10. [Documentation Maintenance](#documentation-maintenance)
 
 ## Project Overview
 
@@ -25,7 +26,7 @@ The project follows a modular architecture with clear separation of concerns:
 ```mermaid
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │  GitHub API     │     │ Text Model API  │     │  Configuration  │
-│  (Data Source)  │◄────┤  (Processing)   │◄────┤  (Environment)  │
+│  (Data Source)  │◄────┤  (Processing)   │◄────┤    System       │
 └────────┬────────┘     └────────┬────────┘     └─────────────────┘
          │                       │
          ▼                       ▼
@@ -34,6 +35,8 @@ The project follows a modular architecture with clear separation of concerns:
 │            (Main Application Logic)             │
 └─────────────────────────────────────────────────┘
 ```
+
+The configuration system supports different environments, but environments only affect the target repository - all other configuration settings are environment-independent and defined directly in the config.js file.
 
 ## Key Components
 
@@ -60,46 +63,29 @@ The project follows a modular architecture with clear separation of concerns:
 
 ## Configuration System
 
-The application uses a JavaScript-based configuration system (not JSON) to support comments and better readability.
+The application uses a JavaScript-based configuration system to support comments and better readability.
 
 ### Configuration Structure
 
+The configuration is structured into logical sections:
+
 ```javascript
-// config.js
+// High-level structure of config.js
 module.exports = {
-  // Environment configurations (only repository target changes between environments)
+  // Environment configurations (ONLY affects repository targeting)
   environments: {
-    testing: {
-      active: true,
-      repository: {
-        owner: 'owner-name',
-        repo: 'repo-name',
-        useLocalIssues: true
-      }
-    },
-    production: {
-      active: false, 
-      repository: {
-        owner: 'external-org',
-        repo: 'external-repo',
-        useLocalIssues: false
-      }
-    }
+    // Different environments (testing, production, etc.)
+    // Each with its target repository information
   },
   
-  // GitHub API configuration
+  // GitHub API configuration (environment-independent)
   github: {
-    baseUrl: 'https://api.github.com',
-    timeoutMs: 10000,
-    maxSockets: 100
+    // API connection settings
   },
   
-  // Model configuration
+  // Model configuration (environment-independent)
   model: {
-    id: 'openai/gpt-4o',
-    temperature: 0.3,
-    maxTokens: 1000,
-    apiEndpoint: 'https://models.github.ai/inference/chat/completions'
+    // AI model settings
   }
 };
 ```
@@ -114,12 +100,13 @@ The `config-loader.js` file provides functions to:
 
 ## Environment Management
 
-The system supports multiple environments (testing and production) with different repository targets. Key features:
+The system supports multiple environments with different repository targets. **Note that environments ONLY affect which repository is targeted - all other configuration settings remain the same across environments.**
+
+Key features:
 
 1. **Toggle Command**: `npm run toggle-env` switches between environments
-2. **Status Command**: `npm run env:status` displays current environment status
+2. **Status Command**: `npm run env:status` displays current environment status 
 3. **Persistence**: Environment changes are persisted to the config file
-4. **Local Testing**: The testing environment can use mock issues for testing
 
 ### Environment Switching
 
@@ -127,7 +114,7 @@ When switching environments:
 
 1. The `active` flag is toggled in the config file
 2. Repository targeting changes (owner/repo)
-3. If `useLocalIssues` is true, mock issues are used instead of API calls
+3. All API calls automatically target the newly selected repository
 
 ## Secrets Management
 
@@ -136,7 +123,7 @@ Secrets like API tokens are stored in a `.secrets` directory and imported direct
 - `.secrets/github.js`: Contains GitHub authentication token
 - `.secrets/gh-model.js`: Contains model API token (if used separately)
 
-**Important**: While repository information can be stored in secrets, the system is designed to prioritize the repository information from `config.js`. This ensures that switching environments correctly changes the target repository.
+**Important**: Secrets should ONLY contain authentication tokens and other sensitive information. Repository targeting should be managed exclusively through `config.js`.
 
 ## Main Workflows
 
@@ -192,3 +179,17 @@ The project includes several test scripts:
 1. Update the prompt template in `prompts/label-template.txt`
 2. Modify the parsing logic in `callModel()` function in `github-model.js`
 3. Update any UI or reporting tools to display the new labels
+
+## Documentation Maintenance
+
+**IMPORTANT: This technical documentation must be kept in sync with code changes.**
+
+### Guidelines for Maintaining Documentation:
+
+1. **Update This Document**: Any significant structural changes to the codebase must be reflected in this documentation file.
+
+2. **Keep It High-Level**: This document should focus on the high-level architecture and concepts, not specific implementation details that may change frequently.
+
+3. **Documentation First**: Consider updating this documentation as part of the planning phase for significant changes, not as an afterthought.
+
+4. **Verification**: Periodically verify that this documentation matches the current codebase structure and functionality.

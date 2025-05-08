@@ -6,7 +6,8 @@
 module.exports = {
   /**
    * Environment configurations
-   * Only repository target changes between environments
+   * ONLY the repository target changes between environments
+   * All other settings remain constant across environments
    */
   environments: {
     testing: {
@@ -14,7 +15,7 @@ module.exports = {
       repository: {
         owner: 'dmitriz',
         repo: 'issue-labeler',
-        useLocalIssues: true
+        // Repository to use during development and testing
       }
     },
     production: {
@@ -22,27 +23,47 @@ module.exports = {
       repository: {
         owner: 'dmitriz',
         repo: 'issue-hub',
-        useLocalIssues: false
+        // The actual production repository where real issues will be labeled
       }
     }
   },
   
   /**
    * GitHub API configuration
+   * Settings that control how the application connects to GitHub's API
    */
   github: {
+    // Base URL for GitHub's REST API
     baseUrl: 'https://api.github.com',
+    
+    // Request timeout in milliseconds
+    // Prevents hanging requests by failing after this duration
     timeoutMs: 10000,
+    
+    // Maximum number of concurrent sockets to use for API calls
+    // Controls how many parallel connections can be made to GitHub
+    // Higher values allow more concurrent requests but may hit rate limits
     maxSockets: 100
   },
   
   /**
-   * Model configuration - same for all environments
+   * Model configuration
+   * Settings for the AI model used to analyze and label issues
    */
   model: {
-    id: 'openai/gpt-4o',
+    // The model name/identifier to use for issue analysis
+    // Format: 'provider/model-name'
+    name: 'openai/gpt-4o',
+    
+    // Controls randomness: 0 = deterministic, 1 = maximum randomness
+    // Lower values produce more consistent/predictable responses
     temperature: 0.3,
+    
+    // Maximum number of tokens (words) in the response
+    // Controls the length of the model's output
     maxTokens: 1000,
+    
+    // URL endpoint for the model API
     apiEndpoint: 'https://models.github.ai/inference/chat/completions'
   }
 };
