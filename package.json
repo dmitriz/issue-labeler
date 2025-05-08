@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/labeler.js",
     "label-issue": "node src/label-issue.js",
+    "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "mocha \"src/**/*.test.js\"",
