@@ -595,7 +595,7 @@ async function retry(fn, options = {}) {
     } catch (error) {
       lastError = error;
       if (attempt < retries) {
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt)));
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt) + Math.floor(Math.random() * 100)));
       }
     }
   }
