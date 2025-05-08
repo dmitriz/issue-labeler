@@ -68,27 +68,6 @@ if (!token) {
   console.warn('No GitHub token found – unauthenticated requests will hit very low ' +
                'rate-limits (<60/h). Set GITHUB_TOKEN or add it to .secrets.');
 }
-    const maybeSecrets = require('../.secrets/github');
-    if (maybeSecrets && maybeSecrets.token) {
-      token = maybeSecrets.token;
-    } else {
-      console.warn('File github.js found but no valid token property exists');
-    }
-  }
-} catch (error) {
-  console.warn('Failed to load GitHub token from secrets:', error.message);
-}
-
-// Fall back to environment variable if secrets didn't work
-if (!token) {
-  token = process.env.GITHUB_TOKEN;
-}
-
-// Final validation and warning
-if (!token) {
-  console.warn('No GitHub token found – unauthenticated requests will hit very low ' +
-               'rate-limits (<60/h). Set GITHUB_TOKEN or add it to .secrets.');
-}
 
 // Load configuration - use central config instead of separate files
 const repoConfig = configLoader.getRepositoryConfig();
