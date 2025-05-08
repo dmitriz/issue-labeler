@@ -1,47 +1,48 @@
+const assert = require('assert');
 const { listIssues } = require('../src/github-api');
 
-// Check for GitHub credentials first
-try {
-  require('../.secrets/github');
-} catch (error) {
-  console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
-  process.exit(0); // Exit gracefully
-}
-
-// Simple promise-based timeout to detect if the API call is hanging
-const timeout = (ms) => new Promise((_, reject) =>
-  setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms)
-);
-
-// Race between the API call and a timeout
-(async () => {
-  try {
-    console.log('Starting API test...');
-    // Race between the API call and a 10-second timeout
-    const issues = await Promise.race([
-      listIssues({}),
-      timeout(10000)  // 10-second timeout
-    ]);
-    
-    console.log('API call successful!');
-    console.log(`Found ${issues.length} issues`);
-    if (issues.length > 0) {
-      console.log('First issue:', {
-        number: issues[0].number,
-        title: issues[0].title,
-        state: issues[0].state
-      });
+describe('Simple GitHub API Test', function() {
+  // Increase timeout for API calls
+  this.timeout(15000);
+  
+  // Check for GitHub credentials
+  let hasCredentials = false;
+  
+  before(function() {
+    try {
+      require('../.secrets/github');
+      hasCredentials = true;
+    } catch (error) {
+      console.log('GitHub credentials not found. Some tests will be skipped.');
     }
-  } catch (error) {
-    console.error('Error occurred:');
-    console.error('Message:', error.message);
-    
-    // Additional debugging for API errors
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Status Text:', error.response.statusText);
-      console.error('Headers:', JSON.stringify(error.response.headers, null, 2));
-      console.error('Data:', JSON.stringify(error.response.data, null, 2));
+  });
+  
+  it('should fetch issues within a reasonable time', async function() {
+    if (!hasCredentials) {
+      this.skip();
+      return;
     }
-  }
-})();
+    
+    // Create a timer to track API response time
+    const startTime = Date.now();
+    
+    try {
+      const issues = await listIssues({});
+      const responseTime = Date.now() - startTime;
+      
+      assert.ok(Array.isArray(issues), 'Issues should be an array');
+      console.log(`API responded in ${responseTime}ms with ${issues.length} issues`);
+      
+      if (issues.length > 0) {
+        console.log('First issue:', {
+          number: issues[0].number,
+          title: issues[0].title,
+          state: issues[0].state
+        });
+      }
+    } catch (error) {
+      console.error('API error:', error.message);
+      throw error;
+    }
+  });
+});

@@ -1,9 +1,15 @@
-// A minimal test that just imports the module and logs
+const assert = require('assert');
 const githubApi = require('../src/github-api');
 
-console.log('Script started');
-console.log('GitHub API module loaded:', Object.keys(githubApi));
-// Verify that exported items are functions
-const allFunctions = Object.values(githubApi).every(item => typeof item === 'function');
-console.log('All exports are functions:', allFunctions);
-console.log('Script completed');
+describe('Minimal Module Test', function() {
+  it('should load the GitHub API module correctly', function() {
+    const exportedKeys = Object.keys(githubApi);
+    assert.ok(exportedKeys.length > 0, 'Should export at least one function');
+    
+    // Verify that exported items are functions
+    const allFunctions = Object.values(githubApi).every(item => typeof item === 'function');
+    assert.ok(allFunctions, 'All exported items should be functions');
+    
+    console.log('GitHub API exports:', exportedKeys);
+  });
+});

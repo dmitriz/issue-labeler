@@ -1,24 +1,34 @@
+const assert = require('assert');
 const { commentOnIssue, listIssues } = require('../src/github-api');
 
-console.log('==== COMMENT TEST STARTED ====');
-
-// Make the async function and call it immediately
-(async function() {
-  try {
-    // Check if we have GitHub credentials before attempting to run the test
+describe('Comment API Test', function() {
+  // Increase timeout for API calls
+  this.timeout(10000);
+  
+  // Test credentials
+  let hasCredentials = false;
+  
+  before(function() {
     try {
       require('../.secrets/github');
+      hasCredentials = true;
     } catch (error) {
-      console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
-      process.exit(0); // Exit gracefully
+      console.log('GitHub credentials not found. Some tests will be skipped.');
+    }
+  });
+  
+  it('should add a comment to an issue', async function() {
+    if (!hasCredentials) {
+      this.skip();
       return;
     }
     
-    // Get the first open issue using listIssues instead of fetchIssues
+    // Get the first open issue
     const issues = await listIssues({ state: 'open' });
     
     if (issues.length === 0) {
       console.log('No open issues found. Skipping comment test.');
+      this.skip();
       return;
     }
     
@@ -30,19 +40,14 @@ console.log('==== COMMENT TEST STARTED ====');
       body: 'Comment added via API test ✅' 
     });
     
+    assert.ok(result, 'Should return a result after adding comment');
+    assert.ok(result.id, 'Comment should have an ID');
+    
     console.log('Success! Comment added:', {
       id: result.id,
       url: result.html_url,
       created_at: result.created_at,
       body: result.body
     });
-    console.log('==== TEST COMPLETED SUCCESSFULLY ====');
-  } catch (error) {
-    console.error('==== TEST FAILED ====');
-    console.error('Error message:', error.message);
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', JSON.stringify(error.response.data, null, 2));
-    }
-  }
-})();
+  });
+});

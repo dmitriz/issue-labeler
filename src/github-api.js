@@ -86,29 +86,64 @@ const BASE_URL = apiConfig.baseUrl || 'https://api.github.com';
  * @returns {string} - The validated segment
  */
 function validatePathSegment(segment) {
-  if (!/^[\w.-]+$/.test(segment)) {
+  // Prevent null or undefined values
+  if (segment === null || segment === undefined) {
+    throw new Error('Path segment cannot be null or undefined');
+  }
+  
+  // Ensure string type
+  if (typeof segment !== 'string') {
+    throw new Error(`Invalid path segment: Expected string but got ${typeof segment}`);
+  }
+  
+  // Normalize: trim and check for empty strings
+  const normalizedSegment = segment.trim();
+  if (normalizedSegment.length === 0) {
+    throw new Error('Path segment cannot be empty');
+  }
+  
+  // Check for dangerous patterns
+  if (normalizedSegment.includes('..') || 
+      normalizedSegment.includes('/') || 
+      normalizedSegment.includes('\\') ||
+      normalizedSegment.startsWith('.')) {
+    throw new Error(`Invalid path segment "${segment}": Potential path traversal detected`);
+  }
+  
+  // Allow only safe characters (alphanumeric, dash, underscore, period)
+  if (!/^[\w.-]+$/.test(normalizedSegment)) {
     throw new Error(`Invalid path segment: "${segment}". Path segments must only contain alphanumeric characters, dashes, underscores, or periods.`);
   }
-  return segment;
+  
+  return normalizedSegment;
 }
 
 /**
  * Create standardized GitHub API client with proper authentication
  * @param {string} [providedToken] - Optional token to override the default
+ * @param {boolean} [allowNoAuth=false] - Whether to allow creation without token (emergency use only)
  * @returns {Object} - Axios instance configured for GitHub API
+ * @throws {Error} - If no token is provided and allowNoAuth is false
  */
-function createGitHubClient(providedToken = token) {
-  if (!providedToken) {
-    console.warn('GitHub token is not set. API calls will likely fail due to authentication issues.');
+function createGitHubClient(providedToken = token, allowNoAuth = false) {
+  // Fail fast if no token is provided unless explicitly allowed
+  if (!providedToken && !allowNoAuth) {
+    throw new Error('GitHub authentication token is required. Please set GITHUB_TOKEN environment variable or add it to .secrets.');
   }
 
-  // Create standardized headers
+  // Create standardized headers - conditionally add auth header only if token exists
   const headers = {
-    'Authorization': `token ${providedToken}`,  // GitHub API prefers 'token' prefix
     'Accept': 'application/vnd.github.v3+json',
     'User-Agent': 'issue-labeler-app',
     'X-GitHub-Api-Version': '2022-11-28'
   };
+  
+  // Add auth header only if token exists
+  if (providedToken) {
+    headers['Authorization'] = `token ${providedToken}`;
+  } else if (!allowNoAuth) {
+    console.warn('WARNING: Creating GitHub client without authentication. API rate limits will be severely restricted.');
+  }
 
   // Create a reusable axios instance with keepAlive enabled
   return axios.create({
@@ -122,8 +157,11 @@ function createGitHubClient(providedToken = token) {
   });
 }
 
-// Create the default GitHub client
-const githubClient = createGitHubClient();
+// Create the default GitHub client - allow emergency fallback to unauthenticated mode
+// but warn about severe rate limiting
+const githubClient = token 
+  ? createGitHubClient(token) 
+  : createGitHubClient(null, true); // explicitly allow no auth as fallback
 
 /**
  * Centralized error handling function
@@ -131,18 +169,36 @@ const githubClient = createGitHubClient();
  * @param {string} context - Description of the operation that failed
  * @param {boolean} [shouldThrow=true] - Whether to throw the error after logging
  * @returns {Error} - The original error (if not throwing)
+ * @throws {Error} - Throws the original error if shouldThrow is true
  */
 function handleGitHubError(error, context, shouldThrow = true) {
-  console.error(`Error ${context}: ${error.message}`);
+  // Create a GitHub-specific error with enhanced context
+  const enhancedError = new Error(`GitHub API Error ${context}: ${error.message}`);
+  enhancedError.originalError = error;
+  enhancedError.context = context;
+  
+  // Add response details if available
   if (error.response) {
-    console.error('API Error:', error.response.status, error.response.statusText);
-    console.error('Error details:', error.response.data);
+    console.error(`API Error (${error.response.status}): ${context}`);
+    console.error('Status:', error.response.status, error.response.statusText);
+    console.error('Details:', JSON.stringify(error.response.data, null, 2));
+    
+    // Add response data to the enhanced error
+    enhancedError.status = error.response.status;
+    enhancedError.statusText = error.response.statusText;
+    enhancedError.responseData = error.response.data;
+  } else {
+    console.error(`Network/Client Error: ${context}`);
+    console.error(error);
   }
   
+  // Always maintain consistent behavior - throw the enhanced error if requested
   if (shouldThrow) {
-    throw error;
+    throw enhancedError;
   }
-  return error;
+  
+  // Only return if explicitly requested not to throw
+  return enhancedError;
 }
 
 /**

@@ -5,12 +5,12 @@
 const assert = require('assert');
 const api = require('../src/github-api');
 
-describe('GitHub API Integration', () => {
+describe('GitHub API Integration', function() {
   // Use a slightly longer timeout since we're making real API calls
-  this.timeout = 10000;
+  this.timeout(10000);
   
-  describe('Issue Fetching', () => {
-    it('should fetch open issues from the current repository', async () => {
+  describe('Issue Fetching', function() {
+    it('should fetch open issues from the current repository', async function() {
       const issues = await api.getAllOpenIssues();
       assert.ok(Array.isArray(issues), 'Should return an array of issues');
       
@@ -24,8 +24,8 @@ describe('GitHub API Integration', () => {
     });
   });
   
-  describe('Repository Info', () => {
-    it('should return valid repository information', () => {
+  describe('Repository Info', function() {
+    it('should return valid repository information', function() {
       const repoInfo = api.getCurrentRepositoryInfo();
       assert.ok(repoInfo.owner, 'Should have an owner');
       assert.ok(repoInfo.repo, 'Should have a repo name');
