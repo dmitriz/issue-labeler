@@ -13,23 +13,81 @@ const configLoader = require('./config-loader');
 const fs = require('fs');
 const path = require('path');
 
-// Get token from .secrets first
-let token;
-try {
-  // Check if we're using gh-model.js or github.js in the secrets folder
-  // Path to secrets is in the root directory, not src
-  const secretsDir = path.join(__dirname, '..', '.secrets');
+// Load GitHub token from various sources with better organization
+function initializeGitHubToken() {
+  try {
+    // Try to load from secret files
+    const token = loadTokenFromSecrets();
+    if (token) return token;
+    
+    // Fall back to environment variable
+    return loadTokenFromEnv();
+  } catch (error) {
+    console.warn('Failed to load GitHub token:', error.message);
+    return null;
+  }
+}
+
+function loadTokenFromSecrets() {
+  const secretsDir = path.resolve(__dirname, '..', '.secrets');
+  
+  // Try loading from gh-model.js first
   if (fs.existsSync(path.join(secretsDir, 'gh-model.js'))) {
-    token = require('../.secrets/gh-model').token;
-  } else {
-    token = require('../.secrets/github').token;
+    const maybeSecrets = require('../.secrets/gh-model');
+    if (maybeSecrets && maybeSecrets.token) {
+      return maybeSecrets.token;
+    }
+    console.warn('File gh-model.js found but no valid token property exists');
+  }
+  
+  // Try loading from github.js next
+  if (fs.existsSync(path.join(secretsDir, 'github.js'))) {
+    const maybeSecrets = require('../.secrets/github');
+    if (maybeSecrets && maybeSecrets.token) {
+      return maybeSecrets.token;
+    }
+    console.warn('File github.js found but no valid token property exists');
+  }
+  
+  return null;
+}
+
+function loadTokenFromEnv() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.warn('No GitHub token found in environment variables');
+  }
+  return token;
+}
+
+// Initialize the token
+const token = initializeGitHubToken();
+
+// Final validation and warning
+if (!token) {
+  console.warn('No GitHub token found – unauthenticated requests will hit very low ' +
+               'rate-limits (<60/h). Set GITHUB_TOKEN or add it to .secrets.');
+}
+    const maybeSecrets = require('../.secrets/github');
+    if (maybeSecrets && maybeSecrets.token) {
+      token = maybeSecrets.token;
+    } else {
+      console.warn('File github.js found but no valid token property exists');
+    }
   }
 } catch (error) {
-  // Fall back to environment variable
+  console.warn('Failed to load GitHub token from secrets:', error.message);
+}
+
+// Fall back to environment variable if secrets didn't work
+if (!token) {
   token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    console.warn('Failed to load GitHub token from secrets or environment:', error.message);
-  }
+}
+
+// Final validation and warning
+if (!token) {
+  console.warn('No GitHub token found – unauthenticated requests will hit very low ' +
+               'rate-limits (<60/h). Set GITHUB_TOKEN or add it to .secrets.');
 }
 
 // Load configuration - use central config instead of separate files
