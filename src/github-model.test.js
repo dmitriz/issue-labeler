@@ -3,9 +3,18 @@
  * Tests the model inference functionality in isolation
  */
 const assert = require('assert');
+const assert = require('assert');
 const { callModel } = require('./github-model');
 
 describe('GitHub Model', () => {
+  describe('callModel', () => {
+    it('should call the model with the correct prompt', async function() {
+      // Mock dependencies or use test doubles
+      // Test that callModel formats the prompt correctly and processes the response
+      // E.g., using sinon to stub API calls
+    });
+  });
+
   describe('parseModelResponse', () => {
     // Expose the internal parseModelResponse function for testing
     const parseModelResponse = require('./github-model').__test__.parseModelResponse;
