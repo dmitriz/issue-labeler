@@ -34,13 +34,16 @@ async function getPromptTemplate() {
 }
 
 /**
- * Process a single issue for labeling
- * @param {Object} issue - Complete issue object from GitHub API 
- * @param {Object} options - Options object
- * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template
- * @returns {Promise<Object>} - Result of processing
+ * Analyzes a GitHub issue and applies urgency and importance labels using an AI model.
+ *
+ * Uses a prompt template to generate a model query based on the issue's title and body, determines appropriate labels, and applies any new labels to the issue. Skips labeling if the issue already has the correct labels.
+ *
+ * @param {Object} issue - The GitHub issue object to process.
+ * @param {Object} options - Options for processing.
+ * @param {string} options.owner - The repository owner.
+ * @param {string} options.repo - The repository name.
+ * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template to use.
+ * @returns {Promise<Object>} An object indicating the result, including success status, applied labels, and action taken.
  */
 async function processIssue(issue, { owner, repo, promptTemplate }) {
   console.log(`Processing issue #${issue.number}: "${issue.title}"`);
