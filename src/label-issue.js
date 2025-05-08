@@ -153,9 +153,10 @@ if (require.main === module) {
   const issueNum = parseInt(issueArg, 10);
   
   if (!issueArg || isNaN(issueNum)) {
-    console.error('Error: Please provide a valid issue number');
+    console.error('Error: Please provide a valid issue number. The issue number must be an integer.');
     console.error('Usage: node src/label-issue.js <issue-number> [owner] [repo]');
     process.exit(1);
+  }
   }
   
   // Get optional owner and repo arguments if provided
