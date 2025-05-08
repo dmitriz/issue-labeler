@@ -13,11 +13,16 @@ const path = require('path');
 const promptTemplatePath = path.join(__dirname, '../prompt-template.txt');
 
 /**
- * Main function to process and label all open issues
- * @param {Object} options - Options object
- * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- * @returns {Promise<Object>} - Summary of processing results
+ * Labels all open GitHub issues in the specified repository using an AI-driven prompt template.
+ *
+ * Fetches all open issues, applies labeling via the AI model for each, and returns a summary of the batch operation, including counts of processed, labeled, skipped, and failed issues.
+ *
+ * @param {Object} options - Contains repository identification.
+ * @param {string} options.owner - The GitHub repository owner.
+ * @param {string} options.repo - The GitHub repository name.
+ * @returns {Promise<Object>} An object summarizing the batch labeling results, including totals and per-issue outcomes.
+ *
+ * @throws {Error} If reading the prompt template fails or if an error occurs during issue processing.
  */
 async function labelAllIssues({ owner, repo }) {
   // Read the prompt template

@@ -16,8 +16,13 @@ const promptTemplatePath = path.join(__dirname, '../prompt-template.txt');
 let cachedPromptTemplate = null;
 
 /**
- * Load the prompt template from disk (only once)
- * @returns {Promise<string>} The prompt template
+ * Asynchronously loads and caches the prompt template from disk.
+ *
+ * Subsequent calls return the cached template without reading from disk again.
+ *
+ * @returns {Promise<string>} The prompt template content.
+ *
+ * @throws {Error} If reading the prompt template file fails.
  */
 async function getPromptTemplate() {
   if (cachedPromptTemplate) {
@@ -34,13 +39,16 @@ async function getPromptTemplate() {
 }
 
 /**
- * Process a single issue for labeling
- * @param {Object} issue - Complete issue object from GitHub API 
- * @param {Object} options - Options object
- * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template
- * @returns {Promise<Object>} - Result of processing
+ * Analyzes a GitHub issue using an AI model to determine urgency and importance labels, then applies any new labels to the issue.
+ *
+ * If no labels are determined or all suggested labels are already present, the function returns a result indicating the action taken.
+ *
+ * @param {Object} issue - The complete GitHub issue object to process.
+ * @param {Object} options - Options for processing.
+ * @param {string} options.owner - The repository owner.
+ * @param {string} options.repo - The repository name.
+ * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template to use for the AI model.
+ * @returns {Promise<Object>} An object describing the outcome, including the issue number, success status, applied labels (if any), and action or error reason.
  */
 async function processIssue(issue, { owner, repo, promptTemplate }) {
   console.log(`Processing issue #${issue.number}: "${issue.title}"`);
@@ -115,12 +123,15 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
 }
 
 /**
- * Helper function to process an issue by its number
- * @param {Object} options - Options object
- * @param {number} options.issueNumber - The issue number to process
- * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- * @returns {Promise<Object>} - Result of processing
+ * Labels a GitHub issue by its number using AI-determined urgency and importance.
+ *
+ * Retrieves the specified issue from GitHub and applies appropriate labels based on AI model analysis.
+ *
+ * @param {Object} options - Contains the issue number, repository owner, and repository name.
+ * @param {number} options.issueNumber - The number of the issue to label.
+ * @param {string} options.owner - The owner of the repository.
+ * @param {string} options.repo - The name of the repository.
+ * @returns {Promise<Object>} The result of the labeling process, including success status and any error information.
  */
 async function labelIssueByNumber({ issueNumber, owner, repo }) {
   try {
