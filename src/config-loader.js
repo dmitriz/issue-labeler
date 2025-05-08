@@ -90,7 +90,7 @@ function getLabelConfig() {
     return { allowedLabels: [] };
   }
   return labelConfig;
-
+}
 
 /**
  * Gets the complete configuration
