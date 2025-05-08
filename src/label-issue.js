@@ -50,7 +50,7 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     const template = promptTemplate || await getPromptTemplate();
     const configLoader = require('./config-loader');
     const labelConfig = configLoader.getLabelConfig();
-    const allowedLabels = labelConfig.allowedLabels || ['urgent', 'important'];
+    const allowedLabels = labelConfig.allowedLabels || [];
     
     // Prepare the prompt by replacing the placeholders with actual issue content
     const prompt = template

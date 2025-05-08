@@ -91,7 +91,6 @@ function getLabelConfig() {
   }
   return labelConfig;
 }
-}
 
 /**
  * Gets the complete configuration
