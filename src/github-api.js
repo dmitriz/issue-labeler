@@ -13,7 +13,13 @@ const configLoader = require('./config-loader');
 const fs = require('fs');
 const path = require('path');
 
-// Load GitHub token from various sources with better organization
+/**
+ * Loads the GitHub authentication token from secret files or environment variables.
+ *
+ * Attempts to retrieve the token from predefined secret files first; if not found, falls back to the `GITHUB_TOKEN` environment variable. Returns `null` if no token is available or if an error occurs during loading.
+ *
+ * @returns {string|null} The GitHub token if found, otherwise `null`.
+ */
 function initializeGitHubToken() {
   try {
     // Try to load from secret files
@@ -28,6 +34,13 @@ function initializeGitHubToken() {
   }
 }
 
+/**
+ * Attempts to load a GitHub authentication token from local secret files.
+ *
+ * Checks for a `token` property in `.secrets/gh-model.js` and `.secrets/github.js`, returning the token if found. Returns `null` if no valid token is present in either file.
+ *
+ * @returns {string|null} The GitHub token if found, or `null` if unavailable.
+ */
 function loadTokenFromSecrets() {
   const secretsDir = path.resolve(__dirname, '..', '.secrets');
   
@@ -52,6 +65,13 @@ function loadTokenFromSecrets() {
   return null;
 }
 
+/**
+ * Retrieves the GitHub token from the environment variable `GITHUB_TOKEN`.
+ *
+ * @returns {string|undefined} The GitHub token if set; otherwise, `undefined`.
+ *
+ * @remark Logs a warning if the token is not found in the environment.
+ */
 function loadTokenFromEnv() {
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
@@ -81,9 +101,12 @@ const defaultRepo = repoConfig.repo;
 const BASE_URL = apiConfig.baseUrl || 'https://api.github.com';
 
 /**
- * Validates GitHub path segments to prevent path traversal attacks
- * @param {string} segment - Path segment to validate
- * @returns {string} - The validated segment
+ * Validates a GitHub API path segment to ensure it is safe and free from path traversal or injection risks.
+ *
+ * @param {string} segment - The path segment to validate.
+ * @returns {string} The sanitized and validated path segment.
+ *
+ * @throws {Error} If {@link segment} is null, undefined, not a string, empty, contains path traversal patterns, or includes invalid characters.
  */
 function validatePathSegment(segment) {
   // Prevent null or undefined values
@@ -119,11 +142,14 @@ function validatePathSegment(segment) {
 }
 
 /**
- * Create standardized GitHub API client with proper authentication
- * @param {string} [providedToken] - Optional token to override the default
- * @param {boolean} [allowNoAuth=false] - Whether to allow creation without token (emergency use only)
- * @returns {Object} - Axios instance configured for GitHub API
- * @throws {Error} - If no token is provided and allowNoAuth is false
+ * Creates an Axios client configured for authenticated GitHub API requests.
+ *
+ * @param {string} [providedToken] - Optional GitHub authentication token to override the default.
+ * @param {boolean} [allowNoAuth=false] - If true, allows client creation without authentication (not recommended).
+ * @returns {Object} Axios instance preconfigured for GitHub API access.
+ * @throws {Error} If no authentication token is provided and {@link allowNoAuth} is false.
+ *
+ * @remark If created without authentication, API rate limits will be extremely limited.
  */
 function createGitHubClient(providedToken = token, allowNoAuth = false) {
   // Fail fast if no token is provided unless explicitly allowed
@@ -164,12 +190,13 @@ const githubClient = token
   : createGitHubClient(null, true); // explicitly allow no auth as fallback
 
 /**
- * Centralized error handling function
- * @param {Error} error - The error object
- * @param {string} context - Description of the operation that failed
- * @param {boolean} [shouldThrow=true] - Whether to throw the error after logging
- * @returns {Error} - The original error (if not throwing)
- * @throws {Error} - Throws the original error if shouldThrow is true
+ * Handles errors from GitHub API operations by enhancing the error with context and response details, logging relevant information, and either throwing or returning the enhanced error.
+ *
+ * @param {Error} error - The error encountered during a GitHub API operation.
+ * @param {string} context - Description of the operation or context in which the error occurred.
+ * @param {boolean} [shouldThrow=true] - If true, the enhanced error is thrown; otherwise, it is returned.
+ * @returns {Error} The enhanced error if not thrown.
+ * @throws {Error} If {@link shouldThrow} is true, throws the enhanced error with additional context and response details.
  */
 function handleGitHubError(error, context, shouldThrow = true) {
   // Create a GitHub-specific error with enhanced context
@@ -202,17 +229,22 @@ function handleGitHubError(error, context, shouldThrow = true) {
 }
 
 /**
- * List issues in a repository
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {string} [params.state='open'] - State of issues to fetch ('open', 'closed', 'all')
- * @param {string|string[]} [params.labels] - Labels to filter by (comma-separated string or array)
- * @param {string} [params.sort='created'] - What to sort results by ('created', 'updated', 'comments')
- * @param {string} [params.direction='desc'] - Direction to sort ('asc' or 'desc')
- * @param {number} [params.per_page=30] - Number of results per page
- * @param {number} [params.page=1] - Page number
- * @returns {Promise<Array>} Array of issue objects
+ * Retrieves a list of issues from a GitHub repository, supporting filtering, sorting, and pagination.
+ *
+ * Filters out pull requests from the results and normalizes label names to lowercase.
+ *
+ * @param {Object} [params] - Optional parameters for filtering and pagination.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository.
+ * @param {string} [params.state] - Issue state to filter by: 'open', 'closed', or 'all'. Defaults to 'open'.
+ * @param {string|string[]} [params.labels] - Labels to filter by, as a comma-separated string or array.
+ * @param {string} [params.sort] - Field to sort by: 'created', 'updated', or 'comments'. Defaults to 'created'.
+ * @param {string} [params.direction] - Sort direction: 'asc' or 'desc'. Defaults to 'desc'.
+ * @param {number} [params.per_page] - Number of results per page. Defaults to 30.
+ * @param {number} [params.page] - Page number to retrieve. Defaults to 1.
+ * @returns {Promise<Array>} Promise resolving to an array of issue objects.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function listIssues({
   owner = defaultOwner,
@@ -273,12 +305,15 @@ async function listIssues({
 }
 
 /**
- * Get a single issue by number
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @returns {Promise<Object>} Issue object
+ * Retrieves a single issue from a GitHub repository by its issue number.
+ *
+ * @param {Object} params - Parameters for issue retrieval.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner if not provided.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository if not provided.
+ * @param {number} params.issue_number - The number of the issue to retrieve.
+ * @returns {Promise<Object>} The issue object returned by the GitHub API.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function getIssue({ owner = defaultOwner, repo = defaultRepo, issue_number }) {
   // Validate required parameters
@@ -299,12 +334,15 @@ async function getIssue({ owner = defaultOwner, repo = defaultRepo, issue_number
 }
 
 /**
- * Get issue content in a simplified format suitable for labeling
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issueNumber - Issue number
- * @returns {Promise<Object>} - Issue object with title, body, and number
+ * Retrieves the title, body, and number of a specific issue in a simplified format.
+ *
+ * @param {Object} params - Parameters for identifying the issue.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner if not provided.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository if not provided.
+ * @param {number} params.issueNumber - The number of the issue to retrieve.
+ * @returns {Promise<Object>} An object containing the issue's title, body, and number.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function getIssueContent({ owner = defaultOwner, repo = defaultRepo, issueNumber }) {
   // Validate parameters
@@ -328,15 +366,18 @@ async function getIssueContent({ owner = defaultOwner, repo = defaultRepo, issue
 }
 
 /**
- * Create a new issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {string} params.title - Issue title
- * @param {string} params.body - Issue body/description
- * @param {string[]} [params.labels] - Array of labels to add
- * @param {string[]} [params.assignees] - Array of usernames to assign
- * @returns {Promise<Object>} Created issue object
+ * Creates a new GitHub issue in the specified repository.
+ *
+ * @param {Object} params - Issue creation parameters.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner if not provided.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository if not provided.
+ * @param {string} params.title - Title of the issue.
+ * @param {string} params.body - Body or description of the issue.
+ * @param {string[]} [params.labels] - Labels to assign to the issue.
+ * @param {string[]} [params.assignees] - Usernames to assign to the issue.
+ * @returns {Promise<Object>} The created issue object.
+ *
+ * @throws {Error} If required parameters {@link owner}, {@link repo}, or {@link title} are missing.
  */
 async function createIssue({ owner = defaultOwner, repo = defaultRepo, title, body, labels = [], assignees = [] } = {}) {
   // Validate required parameters
@@ -357,17 +398,20 @@ async function createIssue({ owner = defaultOwner, repo = defaultRepo, title, bo
 }
 
 /**
- * Update an existing issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @param {string} [params.title] - New title
- * @param {string} [params.body] - New body text
- * @param {string} [params.state] - New state ('open' or 'closed')
- * @param {string[]} [params.labels] - Array of labels (replaces existing labels)
- * @param {string[]} [params.assignees] - Array of usernames to assign (replaces existing assignees)
- * @returns {Promise<Object>} Updated issue object
+ * Updates an existing GitHub issue with new values for title, body, state, labels, or assignees.
+ *
+ * At least one of the updatable fields must be provided. The `labels` and `assignees` arrays, if specified, replace all existing labels or assignees on the issue.
+ *
+ * @param {Object} params - Issue update parameters.
+ * @param {number} params.issue_number - The number of the issue to update.
+ * @param {string} [params.title] - New title for the issue.
+ * @param {string} [params.body] - New body content for the issue.
+ * @param {string} [params.state] - New state for the issue; must be `'open'` or `'closed'`.
+ * @param {string[]} [params.labels] - Labels to set on the issue.
+ * @param {string[]} [params.assignees] - Usernames to assign to the issue.
+ * @returns {Promise<Object>} The updated issue object.
+ *
+ * @throws {Error} If required parameters are missing, if `issue_number` is not a number, if `state` is invalid, or if no update fields are provided.
  */
 async function updateIssue({
   owner = defaultOwner,
@@ -412,13 +456,14 @@ async function updateIssue({
 }
 
 /**
- * Add labels to an issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @param {string[]} params.labels - Array of label names to add
- * @returns {Promise<Array>} Array of labels
+ * Adds one or more labels to a GitHub issue.
+ *
+ * @param {Object} params - Parameters for the operation.
+ * @param {number} params.issue_number - The number of the issue to label.
+ * @param {string[]} params.labels - The labels to add to the issue.
+ * @returns {Promise<Array>} A promise that resolves to the updated list of labels on the issue.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function addLabels({ owner = defaultOwner, repo = defaultRepo, issue_number, labels } = {}) {
   // Validate required parameters
@@ -442,20 +487,32 @@ async function addLabels({ owner = defaultOwner, repo = defaultRepo, issue_numbe
 }
 
 /**
- * Apply labels to a GitHub issue (alias for addLabels with issueNumber param for compatibility)
+ * Applies one or more labels to a GitHub issue using the `issueNumber` parameter.
+ *
+ * This function is an alias for {@link addLabels}, provided for compatibility with codebases that use `issueNumber` instead of `issue_number`.
+ *
+ * @param {Object} params - Parameters for labeling the issue.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repo.
+ * @param {number} params.issueNumber - The number of the issue to label.
+ * @param {string[]} params.labels - Array of label names to apply.
+ * @returns {Promise<Array>} The updated list of labels on the issue.
  */
 async function applyLabels({ owner = defaultOwner, repo = defaultRepo, issueNumber, labels }) {
   return addLabels({ owner, repo, issue_number: issueNumber, labels });
 }
 
 /**
- * Remove a label from an issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @param {string} params.name - Label name to remove
- * @returns {Promise<boolean>} True if successful
+ * Removes a label from a specified GitHub issue.
+ *
+ * @param {Object} params - Parameters for label removal.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner if not provided.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository if not provided.
+ * @param {number} params.issue_number - The issue number from which to remove the label.
+ * @param {string} params.name - The name of the label to remove.
+ * @returns {Promise<boolean>} Resolves to true if the label was successfully removed.
+ *
+ * @throws {Error} If any required parameter is missing or invalid.
  */
 async function removeLabel({ owner = defaultOwner, repo = defaultRepo, issue_number, name } = {}) {
   // Validate required parameters
@@ -478,13 +535,14 @@ async function removeLabel({ owner = defaultOwner, repo = defaultRepo, issue_num
 }
 
 /**
- * Comment on an issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @param {string} params.body - Comment text
- * @returns {Promise<Object>} Comment object
+ * Adds a comment to a GitHub issue.
+ *
+ * @param {Object} params - Parameters for commenting on the issue.
+ * @param {number} params.issue_number - The number of the issue to comment on.
+ * @param {string} params.body - The text of the comment.
+ * @returns {Promise<Object>} The created comment object.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function commentOnIssue({ owner = defaultOwner, repo = defaultRepo, issue_number, body } = {}) {
   // Validate required parameters
@@ -508,12 +566,15 @@ async function commentOnIssue({ owner = defaultOwner, repo = defaultRepo, issue_
 }
 
 /**
- * List comments on an issue
- * @param {Object} params - Parameters object
- * @param {string} [params.owner=defaultOwner] - Repository owner
- * @param {string} [params.repo=defaultRepo] - Repository name
- * @param {number} params.issue_number - Issue number
- * @returns {Promise<Array>} Array of comment objects
+ * Retrieves all comments for a specific issue in a repository.
+ *
+ * @param {Object} params - Parameters for the request.
+ * @param {string} [params.owner] - Repository owner. Defaults to the configured owner if not provided.
+ * @param {string} [params.repo] - Repository name. Defaults to the configured repository if not provided.
+ * @param {number} params.issue_number - The number of the issue to retrieve comments for.
+ * @returns {Promise<Array>} A promise that resolves to an array of comment objects for the specified issue.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
  */
 async function listComments({ owner = defaultOwner, repo = defaultRepo, issue_number } = {}) {
   // Validate required parameters
@@ -535,18 +596,24 @@ async function listComments({ owner = defaultOwner, repo = defaultRepo, issue_nu
 }
 
 /**
- * Get all open issues
- * @returns {Promise<Array>} Array of open issue objects
+ * Retrieves all open issues in the current repository.
+ *
+ * @returns {Promise<Array>} A promise that resolves to an array of open issue objects.
  */
 async function getAllOpenIssues() {
   return listIssues({ state: 'open' });
 }
 
 /**
- * Gets issues with a specific label
- * @param {string|Array} issues - Array of issues to filter or label to search for
- * @param {string} [label] - Label to filter by (if first param is array of issues)
- * @returns {Promise<Array>|Array} - Filtered array of issues or promise resolving to issues
+ * Retrieves issues that have a specific label, either by filtering an array of issues or by fetching from GitHub.
+ *
+ * If called with an array of issues and a label, returns only those issues containing the label. If called with a label string, fetches issues from GitHub that have that label.
+ *
+ * @param {Array|String} issues - An array of issue objects to filter, or a label string to fetch issues by.
+ * @param {string} [label] - The label to filter by when providing an array of issues.
+ * @returns {Promise<Array>|Array} Filtered issues or a promise resolving to issues with the specified label.
+ *
+ * @throws {Error} If parameters do not match the expected usage.
  */
 function getIssuesWithLabel(issues, label) {
   // Case 1: Function was called with (issues[], label) to filter existing issues
@@ -569,8 +636,9 @@ function getIssuesWithLabel(issues, label) {
 }
 
 /**
- * Gets the current repository configuration
- * @returns {Object} Current repository configuration
+ * Returns information about the current repository and environment.
+ *
+ * @returns {{ owner: string, repo: string, isLocal: boolean, environment: string }} An object containing the repository owner, name, whether local issues are used, and the active environment name.
  */
 function getCurrentRepositoryInfo() {
   return {
@@ -582,12 +650,15 @@ function getCurrentRepositoryInfo() {
 }
 
 /**
- * Retry a function with exponential backoff
- * @param {Function} fn - The function to retry
- * @param {Object} [options] - Retry options
- * @param {number} [options.retries=3] - Number of times to retry
- * @param {number} [options.delay=500] - Base delay in ms
- * @returns {Promise<any>} - The function result
+ * Executes an asynchronous function with automatic retries using exponential backoff and jitter.
+ *
+ * @param {Function} fn - The asynchronous function to execute.
+ * @param {Object} [options] - Optional retry configuration.
+ * @param {number} [options.retries=3] - Maximum number of retry attempts.
+ * @param {number} [options.delay=500] - Initial delay in milliseconds before retrying, doubled on each attempt.
+ * @returns {Promise<any>} Resolves with the result of {@link fn} if successful.
+ *
+ * @throws {Error} If all retry attempts fail, throws the last encountered error.
  */
 async function retry(fn, options = {}) {
   const { retries = 3, delay = 500 } = options;
