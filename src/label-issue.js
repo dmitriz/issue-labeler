@@ -82,10 +82,10 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
 
     // Create and apply ONLY allowed labels
     const labels = [];
-    if (urgency && allowedLabels.includes(urgency)) {
+    if (urgency && allowedLabels.includes(urgency.toLowerCase())) {
       labels.push(urgency);
     }
-    if (importance && allowedLabels.includes(importance)) {
+    if (importance && allowedLabels.includes(importance.toLowerCase())) {
       labels.push(importance);
     }
 
