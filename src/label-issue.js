@@ -34,16 +34,13 @@ async function getPromptTemplate() {
 }
 
 /**
- * Analyzes a GitHub issue and applies urgency and importance labels using an AI model.
- *
- * Uses a prompt template to generate a model query based on the issue's title and body, determines appropriate labels, and applies any new labels to the issue. Skips labeling if the issue already has the correct labels.
- *
- * @param {Object} issue - The GitHub issue object to process.
- * @param {Object} options - Options for processing.
- * @param {string} options.owner - The repository owner.
- * @param {string} options.repo - The repository name.
- * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template to use.
- * @returns {Promise<Object>} An object indicating the result, including success status, applied labels, and action taken.
+ * Process a single issue for labeling
+ * @param {Object} issue - Complete issue object from GitHub API 
+ * @param {Object} options - Options object
+ * @param {string} options.owner - Repository owner
+ * @param {string} options.repo - Repository name
+ * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template
+ * @returns {Promise<Object>} - Result of processing
  */
 async function processIssue(issue, { owner, repo, promptTemplate }) {
   console.log(`Processing issue #${issue.number}: "${issue.title}"`);
@@ -51,6 +48,9 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
   try {
     // Use provided promptTemplate or load it if not provided
     const template = promptTemplate || await getPromptTemplate();
+    const configLoader = require('./config-loader');
+    const labelConfig = configLoader.getLabelConfig();
+    const allowedLabels = labelConfig.allowedLabels || ['urgent', 'important'];
     
     // Prepare the prompt by replacing the placeholders with actual issue content
     const prompt = template
@@ -62,14 +62,20 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     const { urgency, importance } = await callModel(prompt);
     console.log(`Model result for issue #${issue.number}: urgency=${urgency}, importance=${importance}`);
 
-    // Create and apply labels
+    // Create and apply ONLY allowed labels
     const labels = [];
-    if (urgency) labels.push(urgency);
-    if (importance) labels.push(importance);
+    if (urgency && allowedLabels.includes(urgency)) {
+      labels.push(urgency);
+    }
+    if (importance && allowedLabels.includes(importance)) {
+      labels.push(importance);
+    }
+
+    console.log(`Filtered labels for issue #${issue.number}: ${labels.join(', ') || 'none'}`);
 
     if (labels.length === 0) {
-      console.warn(`No labels determined for issue #${issue.number}.`);
-      return { issue: issue.number, success: false, reason: 'no_labels_determined' };
+      console.warn(`No allowed labels determined for issue #${issue.number}.`);
+      return { issue: issue.number, success: false, reason: 'no_allowed_labels_determined' };
     }
 
     // Check if the issue already has these labels to avoid unnecessary API calls

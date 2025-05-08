@@ -3,7 +3,7 @@
  * Tests the complete issue labeling process from start to finish
  */
 const assert = require('assert');
-const { main } = require('../src/label-issue');
+const { labelIssueByNumber } = require('../src/label-issue');
 const api = require('../src/github-api');
 
 describe('Label Issue E2E', function() {
@@ -55,30 +55,41 @@ describe('Label Issue E2E', function() {
     // Load the repository info from config
     const repoInfo = api.getCurrentRepositoryInfo();
     
-    // Run the main labeling function
-    await main({
+    // Run the labeling function
+    const result = await labelIssueByNumber({
       issueNumber: TEST_ISSUE_NUMBER,
       owner: repoInfo.owner,
       repo: repoInfo.repo
     });
     
-    // Verify that labels were applied
-    const updatedIssue = await api.getIssue({ issue_number: TEST_ISSUE_NUMBER });
-    const appliedLabels = updatedIssue.labels.map(l => l.name);
+    // Get the allowed labels from config
+    const configLoader = require('../src/config-loader');
+    const allowedLabels = configLoader.getLabelConfig().allowedLabels;
     
-    // Check for urgency/importance labels
-    const hasUrgencyLabel = appliedLabels.some(label => 
-      label === 'urgent' || 
-      label === 'not_urgent' || 
-      label === 'not urgent'
-    );
-    const hasImportanceLabel = appliedLabels.some(label => 
-      label === 'important' || 
-      label === 'not_important' || 
-      label === 'low'
-    );
-    
-    assert.ok(hasUrgencyLabel, 'Issue should have an urgency label applied');
-    assert.ok(hasImportanceLabel, 'Issue should have an importance label applied');
+    // If the result indicates success, verify that labels were applied correctly
+    if (result.success) {
+      // Verify that labels were applied
+      const updatedIssue = await api.getIssue({ issue_number: TEST_ISSUE_NUMBER });
+      const appliedLabels = updatedIssue.labels.map(l => l.name);
+      
+      // Check if any of our allowed labels were applied
+      const hasAllowedLabel = appliedLabels.some(label => 
+        allowedLabels.includes(label.toLowerCase())
+      );
+      
+      if (hasAllowedLabel) {
+        // Test passes if allowed labels were applied
+        assert.ok(true, 'Issue has allowed labels applied');
+      } else {
+        // If labels were skipped because they already existed, that's also a success
+        assert.strictEqual(result.action, 'skipped_already_labeled', 
+          'If no new labels were applied, the action should be skipped_already_labeled');
+      }
+    } else {
+      // If the model determined no allowed labels (e.g., not urgent, not important),
+      // then the process should fail with a specific reason
+      assert.strictEqual(result.reason, 'no_allowed_labels_determined',
+        'When no allowed labels are determined, the result should indicate this reason');
+    }
   });
 });

@@ -6,6 +6,7 @@
  */
 const { getAllOpenIssues } = require('./github-api');
 const { processIssue } = require('./label-issue');
+const configLoader = require('./config-loader');
 const fs = require('fs');
 const path = require('path');
 
@@ -32,6 +33,11 @@ async function labelAllIssues({ owner, repo }) {
   console.log(`Processing all open issues from ${owner}/${repo}...`);
   
   try {
+    // Log which labels are allowed according to configuration
+    const labelConfig = configLoader.getLabelConfig();
+    const allowedLabels = labelConfig.allowedLabels || [];
+    console.log(`Using label configuration with allowed labels: ${allowedLabels.join(', ') || 'none'}`);
+
     // Step 1: Fetch all open issues
     console.log('Fetching all open issues...');
     const issues = await getAllOpenIssues();

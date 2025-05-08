@@ -72,11 +72,19 @@ function getModelConfig() {
 }
 
 /**
- * Gets the GitHub API configuration
+ * Gets the API configuration
  * @returns {Object} - API configuration object
  */
 function getApiConfig() {
   return config.github;
+}
+
+/**
+ * Gets the label configuration
+ * @returns {Object} - Label configuration object with default empty allowedLabels if not configured
+ */
+function getLabelConfig() {
+  return config.labels || { allowedLabels: [] };
 }
 
 /**
@@ -137,5 +145,6 @@ module.exports = {
   getRepositoryConfig,
   getModelConfig,
   getApiConfig,
+  getLabelConfig,
   switchEnvironment
 };
