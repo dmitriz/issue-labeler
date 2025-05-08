@@ -65,5 +65,20 @@ module.exports = {
     
     // URL endpoint for the model API
     apiEndpoint: 'https://models.github.ai/inference/chat/completions'
+  },
+
+  /**
+   * Label configuration
+   * Restricts label application to a pre-approved set to ensure consistent
+   * issue categorization and prevent label sprawl. This enforcement mechanism
+   * maintains labeling standards across the project and prevents unauthorized
+   * or redundant labels from being applied automatically.
+   */
+  labels: {
+    // Only these labels will be applied, all others will be ignored
+    allowedLabels: ['urgent', 'important'],
+    
+    // Mapping from model output to labels (if needed for future use)
+    mapping: {}
   }
 };

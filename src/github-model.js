@@ -111,6 +111,22 @@ async function callModel(prompt) {
       importance: parsedJson.importance && parsedJson.importance.trim() !== '' ? parsedJson.importance.trim() : null
     };
   } catch (error) {
+    // Special handling for rate limit errors (429 status)
+    if (error.response && error.response.status === 429) {
+      const retryAfter = parseInt(error.response.headers?.['retry-after']) || 60;
+      console.warn(`Rate limit exceeded. Retry after ${retryAfter} seconds.`);
+      
+      // Create a custom rate limit error with special properties
+      const rateLimitError = new Error(`Rate limit exceeded. Retry after ${retryAfter} seconds.`);
+      rateLimitError.isRateLimit = true;
+      rateLimitError.retryAfter = retryAfter;
+      rateLimitError.name = 'RateLimitError';
+      
+      // Ensure any test that catches this knows it's a rate limit issue
+      throw rateLimitError;
+    }
+    
+    // For other errors, use the standard handler and rethrow
     handleModelError(error);
     throw error;
   }
@@ -154,15 +170,21 @@ async function callGithubModel({ prompt }) {
 /**
  * Handle model API errors with proper logging and retry information
  * @param {Error} error - The error object
+ * @returns {Error} - A standardized error with additional information
  */
 function handleModelError(error) {
-  // Check for rate limiting
+  // Create a custom error for rate limiting
   if (error.response?.status === 429) {
     console.warn("Rate limit exceeded. Implementing exponential backoff retry.");
     // Get retry-after header if available or default to 1 second
-    const retryAfter = parseInt(error.response.headers?.['retry-after']) || 1;
+    const retryAfter = parseInt(error.response.headers?.['retry-after']) || 60;
     console.log(`Retrying after ${retryAfter} seconds`);
-    throw new Error(`Rate limit exceeded. Retry after ${retryAfter} seconds.`);
+    
+    // Create a custom rate limit error
+    const rateLimitError = new Error(`Rate limit exceeded. Retry after ${retryAfter} seconds.`);
+    rateLimitError.isRateLimit = true;
+    rateLimitError.retryAfter = retryAfter;
+    return rateLimitError;
   }
 
   console.error('Error calling GitHub model:', error.message);
@@ -172,6 +194,7 @@ function handleModelError(error) {
   } else {
     console.error('Error stack:', error.stack);
   }
+  return error;
 }
 
 module.exports = {

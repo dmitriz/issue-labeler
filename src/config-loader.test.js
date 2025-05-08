@@ -28,6 +28,18 @@ describe('Config Loader', () => {
     });
   });
   
+  describe('getLabelConfig', () => {
+    it('should return label configuration', () => {
+      const labelConfig = configLoader.getLabelConfig();
+      
+      assert.ok(labelConfig, 'Should return label config');
+      assert.ok(Array.isArray(labelConfig.allowedLabels), 'Should have allowedLabels array');
+      // Check that the config contains the urgent and important labels
+      assert.ok(labelConfig.allowedLabels.includes('urgent'), 'Should include urgent label');
+      assert.ok(labelConfig.allowedLabels.includes('important'), 'Should include important label');
+    });
+  });
+  
   describe('getConfig', () => {
     it('should return the complete configuration', () => {
       const config = configLoader.getConfig();

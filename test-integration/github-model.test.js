@@ -80,6 +80,16 @@ describe('GitHub Model Integration', function() {
         throw parseError;
       }
     } catch (error) {
+      // Check for any rate limit related errors
+      if (error.message && (
+        error.message.includes('Rate limit exceeded') || 
+        error.message.includes('429') || 
+        (error.response && error.response.status === 429)
+      )) {
+        console.log('API rate limit exceeded. Skipping GitHub model test.');
+        this.skip();
+        return;
+      }
       console.error("Error calling GitHub model:", error);
       throw error;
     }
