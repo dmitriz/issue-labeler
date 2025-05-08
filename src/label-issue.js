@@ -90,12 +90,11 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
 
     console.log(`Applying labels to issue #${issue.number}: ${newLabels.join(', ')}...`);
     await applyLabels({ 
-      main({ issueNumber: issueNum, owner, repo })
-        .then(() => console.log('Issue labeling process completed successfully'))
-        .catch(err => {
-          console.error('Fatal error:', err && err.message ? err.message : err);
-          process.exit(1);
-        });
+      issueNumber: issue.number, 
+      owner, 
+      repo,
+      labels: newLabels
+    });
     console.log(`Successfully labeled issue #${issue.number} with: ${newLabels.join(', ')}`);
     return { 
       issue: issue.number, 
@@ -153,15 +152,14 @@ if (require.main === module) {
   const issueNum = parseInt(issueArg, 10);
   
   if (!issueArg || isNaN(issueNum)) {
-    console.error('Error: Please provide a valid issue number. The issue number must be an integer.');
-    console.error('Usage: node src/label-issue.js <issue-number> [owner] [repo]');
-    process.exit(1);
-  }
-  }
-  
-  // Get optional owner and repo arguments if provided
-  const owner = process.argv[3] || defaultOwner;
-  const repo = process.argv[4] || defaultRepo;
+      console.error('Error: Please provide a valid issue number. The issue number must be an integer.');
+      console.error('Usage: node src/label-issue.js <issue-number> [owner] [repo]');
+      process.exit(1);
+    }
+    
+    // Get optional owner and repo arguments if provided
+    const owner = process.argv[3] || defaultOwner;
+    const repo = process.argv[4] || defaultRepo;
   
   labelIssueByNumber({ issueNumber: issueNum, owner, repo })
     .then(result => {
