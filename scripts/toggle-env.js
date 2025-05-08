@@ -5,7 +5,7 @@
  * Automatically switches between testing and production environments
  * regardless of which one is currently active.
  */
-const configLoader = require('../config-loader');
+const configLoader = require('../src/config-loader');
 
 // Get currently active environment
 const activeEnv = configLoader.getActiveEnvironment();

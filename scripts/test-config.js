@@ -1,8 +1,8 @@
 /**
  * Test script to verify environment configuration system
  */
-const configLoader = require('./config-loader');
-const issuesFetcher = require('./github-issue-fetcher');
+const configLoader = require('../src/config-loader');
+const issuesFetcher = require('../src/github-issue-fetcher');
 const fs = require('fs');
 const path = require('path');
 

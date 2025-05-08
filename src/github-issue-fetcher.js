@@ -22,7 +22,7 @@ const owner = repoConfig.owner;
 const repo = repoConfig.repo;
 
 try {
-  const secretsConfig = require('./.secrets/github');
+  const secretsConfig = require('../.secrets/github');
   token = secretsConfig.token;
 } catch (error) {
   console.error('Failed to load secrets:', error.message);

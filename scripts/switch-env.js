@@ -4,12 +4,12 @@
  * Command-line utility to switch between environments
  * Usage: node switch-env.js [environment-name]
  */
-const { switchEnvironment, getActiveEnvironment, loadConfig } = require('../config-loader');
+const { switchEnvironment, getActiveEnvironment, getConfig } = require('../src/config-loader');
 
-// Define available environmenCan you insure there is an N Pts from config
+// Define available environments from config
 let config;
 try {
-  config = loadConfig();
+  config = getConfig();
 } catch (error) {
   console.error(`Failed to load configuration: ${error.message}`);
   process.exit(1);

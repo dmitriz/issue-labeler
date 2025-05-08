@@ -1,5 +1,5 @@
-const { fetchIssues, addLabelsToIssue, commentOnIssue } = require('./scripts/github-api');
-const { token, owner, repo } = require('./.secrets/github');
+const { fetchIssues, addLabelsToIssue, commentOnIssue } = require('../src/github-api');
+const { token, owner, repo } = require('../.secrets/github');
 
 // Set up process error handling
 process.on('uncaughtException', (error) => {

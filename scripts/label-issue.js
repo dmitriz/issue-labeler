@@ -4,14 +4,14 @@
  * It fetches issue content, uses a model to determine urgency and importance,
  * and then applies those labels to the issue.
  */
-const { getIssueContent, applyLabels } = require('./github-api-client');
-const { callModel } = require('./github-model');
+const { getIssueContent, applyLabels } = require('../src/github-api-client');
+const { callModel } = require('../src/github-model');
 const fs = require('fs');
 const path = require('path');
 const { Command } = require('commander');
 
 // Path to the prompt template
-const promptTemplatePath = path.join(__dirname, 'prompt-template.txt');
+const promptTemplatePath = path.join(__dirname, '../prompt-template.txt');
 
 /**
  * Main function to process and label an issue

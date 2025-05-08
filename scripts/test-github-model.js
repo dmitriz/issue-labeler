@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { callGithubModel } = require('./github-model');
+const { callGithubModel } = require('../src/github-model');
 
 function validateIssue(issue) {
   if (!issue.title || typeof issue.title !== 'string') {

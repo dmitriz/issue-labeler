@@ -16,10 +16,12 @@ const apiConfig = configLoader.getApiConfig();
 let token;
 try {
   // Check if we're using gh-model.js or github.js in the secrets folder
-  if (fs.existsSync(path.join(__dirname, '.secrets', 'gh-model.js'))) {
-    token = require('./.secrets/gh-model').token;
+  // Path to secrets is in the root directory, not src
+  const secretsDir = path.join(__dirname, '..', '.secrets');
+  if (fs.existsSync(path.join(secretsDir, 'gh-model.js'))) {
+    token = require('../.secrets/gh-model').token;
   } else {
-    token = require('./.secrets/github').token;
+    token = require('../.secrets/github').token;
   }
 } catch (error) {
   console.error('Failed to load secrets:', error.message);

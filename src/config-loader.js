@@ -5,11 +5,11 @@
 const path = require('path');
 const fs = require('fs');
 
-// Config file path
-const CONFIG_PATH = path.join(__dirname, 'config.js');
+// Config file path - config.js is in the root directory
+const CONFIG_PATH = path.join(__dirname, '..', 'config.js');
 
 // Import the config directly from JS file
-const config = require('./config');
+const config = require('../config');
 
 /**
  * Validates the configuration structure
@@ -126,7 +126,7 @@ function switchEnvironment(environmentName) {
   updateConfigFile(config);
   
   // Clear the require cache for config.js to reload on next require
-  delete require.cache[require.resolve('./config')];
+  delete require.cache[require.resolve('../config')];
   
   return config;
 }

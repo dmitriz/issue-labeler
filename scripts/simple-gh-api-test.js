@@ -1,4 +1,4 @@
-const { fetchIssues } = require('./scripts/github-api');
+const { fetchIssues } = require('../src/github-api');
 
 // Simple promise-based timeout to detect if the API call is hanging
 const timeout = (ms) => new Promise((_, reject) =>
