@@ -8,7 +8,6 @@ const { getIssueContent, applyLabels } = require('./github-api');
 const { callModel } = require('./github-model');
 const fs = require('fs');
 const path = require('path');
-const { Command } = require('commander');
 
 // Path to the prompt template
 const promptTemplatePath = path.join(__dirname, '../prompt-template.txt');
@@ -71,33 +70,32 @@ async function main({ issueNumber, owner, repo }) {
   }
 }
 
-// Parse command-line arguments
+// Simple handling if run directly from command line
 if (require.main === module) {
-  const program = new Command();
-
-  program
-    .name('label-issue')
-    .description('Automatically label GitHub issues based on their content')
-    .argument('<issue-number>', 'The issue number to process')
-    .option('-o, --owner <owner>', 'Repository owner', 'dmitriz')
-    .option('-r, --repo <repo>', 'Repository name', 'issue-labeler')
-    .action(async (issueNumber, options) => {
-      const issueNum = parseInt(issueNumber, 10);
-      if (isNaN(issueNum)) {
-        console.error('Error: <issue-number> must be a valid number');
-        process.exit(1);
-      }
-
-      try {
-        await main({ issueNumber: issueNum, owner: options.owner, repo: options.repo });
-        console.log('Issue labeling process completed successfully');
-      } catch (err) {
-        console.error('Fatal error:', err.message);
-        process.exit(1);
-      }
+  // Set default values
+  const defaultOwner = 'dmitriz';
+  const defaultRepo = 'issue-labeler';
+  
+  // Get issue number from command line arguments
+  const issueArg = process.argv[2];
+  const issueNum = parseInt(issueArg, 10);
+  
+  if (!issueArg || isNaN(issueNum)) {
+    console.error('Error: Please provide a valid issue number');
+    console.error('Usage: node src/label-issue.js <issue-number> [owner] [repo]');
+    process.exit(1);
+  }
+  
+  // Get optional owner and repo arguments if provided
+  const owner = process.argv[3] || defaultOwner;
+  const repo = process.argv[4] || defaultRepo;
+  
+  main({ issueNumber: issueNum, owner, repo })
+    .then(() => console.log('Issue labeling process completed successfully'))
+    .catch(err => {
+      console.error('Fatal error:', err.message);
+      process.exit(1);
     });
-
-  program.parse(process.argv);
 }
 
 module.exports = { main };
