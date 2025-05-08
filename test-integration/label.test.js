@@ -39,7 +39,8 @@ describe('Label API Test', function() {
     
     console.log(`Attempting to add label to issue #${issue_number}...`);
     
-    const testLabel = process.env.TEST_LABEL || process.argv[3] || `test-label-${Date.now()}`;
+    // Always use 'important' as the test label instead of a generated test label
+    const testLabel = process.env.TEST_LABEL || process.argv[3] || `important`;
     const result = await addLabelsToIssue({
       issue_number,
       labels: [testLabel]

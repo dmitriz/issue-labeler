@@ -48,7 +48,7 @@ describe('GitHub API Wrapper Integration', function() {
     const targetIssue = issues[0];
     
     // Add a uniquely identifiable test label
-    const testLabel = `test-label-${Date.now()}`;
+    const testLabel = `important`;
     const labelResult = await addLabelsToIssue({ 
       issue_number: targetIssue.number, 
       labels: [testLabel] 
@@ -59,7 +59,7 @@ describe('GitHub API Wrapper Integration', function() {
     // Add a comment
     const commentResult = await commentOnIssue({ 
       issue_number: targetIssue.number, 
-      body: `Label ${testLabel} added via API test ✅ [${new Date().toISOString()}]` 
+      body: `Label "${testLabel}" added via API test ✅ [${new Date().toISOString()}]` 
     });
     
     assert.ok(commentResult, 'Should return a result after adding comment');
