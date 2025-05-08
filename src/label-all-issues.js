@@ -57,7 +57,8 @@ async function labelAllIssues({ owner, repo }) {
       success: 0,
       failed: 0,
       skipped: 0,
-      labeled: 0
+      labeled: 0,
+      rateLimited: 0
     };
     
     // Process issues sequentially to avoid rate limits
@@ -79,7 +80,22 @@ async function labelAllIssues({ owner, repo }) {
           summary.skipped++;
         }
       } else {
-        summary.failed++;
+        // Special handling for rate limit errors
+        if (result.reason === 'rate_limit_exceeded') {
+          summary.rateLimited++;
+          console.log(`Rate limit encountered on issue #${issue.number}. Stopping batch processing.`);
+          
+          // Add rate limit information to the summary
+          summary.rateLimitInfo = {
+            retryAfter: result.retryAfter,
+            message: result.error
+          };
+          
+          // Stop processing remaining issues once we hit a rate limit
+          break;
+        } else {
+          summary.failed++;
+        }
       }
       
       // Add a small delay between requests to avoid hitting rate limits
@@ -91,11 +107,12 @@ async function labelAllIssues({ owner, repo }) {
     console.log(`Total issues: ${summary.total}`);
     console.log(`Successfully processed: ${summary.success}`);
     console.log(`Failed: ${summary.failed}`);
+    console.log(`Rate limited: ${summary.rateLimited}`);
     console.log(`New labels applied: ${summary.labeled}`);
     console.log(`Already correctly labeled: ${summary.skipped}`);
     
     return {
-      success: true,
+      success: summary.rateLimited === 0, // Only consider successful if we didn't hit rate limits
       summary,
       results
     };

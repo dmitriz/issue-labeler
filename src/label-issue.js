@@ -59,7 +59,25 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     
     // Call the GitHub Model API individually for this issue
     console.log(`Analyzing issue #${issue.number} with GitHub Model...`);
-    const { urgency, importance } = await callModel(prompt);
+    let modelResult;
+    try {
+      modelResult = await callModel(prompt);
+    } catch (error) {
+      // Special handling for rate limit errors
+      if (error.isRateLimit) {
+        console.log(`Rate limit hit while processing issue #${issue.number}. Consider trying again later.`);
+        return { 
+          issue: issue.number, 
+          success: false, 
+          error: error.message,
+          reason: 'rate_limit_exceeded',
+          retryAfter: error.retryAfter
+        };
+      }
+      throw error; // Re-throw other errors
+    }
+    
+    const { urgency, importance } = modelResult;
     console.log(`Model result for issue #${issue.number}: urgency=${urgency}, importance=${importance}`);
 
     // Create and apply ONLY allowed labels

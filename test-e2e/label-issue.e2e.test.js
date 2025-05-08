@@ -56,15 +56,34 @@ describe('Label Issue E2E', function() {
     const repoInfo = api.getCurrentRepositoryInfo();
     
     // Run the labeling function
-    const result = await labelIssueByNumber({
-      issueNumber: TEST_ISSUE_NUMBER,
-      owner: repoInfo.owner,
-      repo: repoInfo.repo
-    });
+    let result;
+    try {
+      result = await labelIssueByNumber({
+        issueNumber: TEST_ISSUE_NUMBER,
+        owner: repoInfo.owner,
+        repo: repoInfo.repo
+      });
+    } catch (error) {
+      // If we get a rate limit error, skip the test
+      if (error.message && error.message.includes('Rate limit exceeded')) {
+        console.log('API rate limit exceeded. Skipping test.');
+        this.skip();
+        return;
+      }
+      throw error; // Re-throw any other error
+    }
     
     // Get the allowed labels from config
     const configLoader = require('../src/config-loader');
     const allowedLabels = configLoader.getLabelConfig().allowedLabels;
+    
+    // Check if this is a rate limit error
+    if (result && !result.success && result.error && 
+        (result.error.includes('Rate limit') || result.error.includes('429'))) {
+      console.log('API rate limit exceeded. Skipping test.');
+      this.skip();
+      return;
+    }
     
     // If the result indicates success, verify that labels were applied correctly
     if (result.success) {

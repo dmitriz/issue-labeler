@@ -84,7 +84,13 @@ function getApiConfig() {
  * @returns {Object} - Label configuration object with default empty allowedLabels if not configured
  */
 function getLabelConfig() {
-  return config.labels || { allowedLabels: [] };
+  const labelConfig = config.labels;
+  if (!labelConfig) {
+    console.warn('Warning: Label configuration is missing in config.js.  No labels will be applied.');
+    return { allowedLabels: [] };
+  }
+  return labelConfig;
+}
 }
 
 /**
