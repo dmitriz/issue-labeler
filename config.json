@@ -1,4 +1,40 @@
 {
-  "model": "gpt-4",
-  "temperature": 0.3
+  "environments": {
+    "testing": {
+      "active": true,
+      "repository": {
+        "owner": "dmitriz",
+        "repo": "issue-labeler",
+        "useLocalIssues": true
+      },
+      "model": {
+        "id": "openai/gpt-4o",
+        "temperature": 0.3,
+        "maxTokens": 1000
+      }
+    },
+    "production": {
+      "active": false,
+      "repository": {
+        "owner": "external-org",
+        "repo": "external-repo",
+        "useLocalIssues": false
+      },
+      "model": {
+        "id": "openai/gpt-4o",
+        "temperature": 0.2,
+        "maxTokens": 1000
+      }
+    }
+  },
+  "api": {
+    "baseUrl": "https://api.github.com",
+    "timeoutMs": 10000,
+    "maxSockets": 100,
+    "rateLimitHandling": {
+      "retryAfterRateLimit": true,
+      "maxRetries": 3,
+      "backoffMs": 2000
+    }
+  }
 }
