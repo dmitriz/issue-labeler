@@ -69,7 +69,10 @@ module.exports = {
 
   /**
    * Label configuration
-   * Settings for which labels are allowed to be applied
+   * Restricts label application to a pre-approved set to ensure consistent
+   * issue categorization and prevent label sprawl. This enforcement mechanism
+   * maintains labeling standards across the project and prevents unauthorized
+   * or redundant labels from being applied automatically.
    */
   labels: {
     // Only these labels will be applied, all others will be ignored
