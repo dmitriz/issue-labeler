@@ -18,6 +18,14 @@ To run all integration tests:
 npm run test:integration
 ```
 
+To run individual test files directly (preferred for development):
+
+```bash
+node test-integration/fetch-only.test.js
+node test-integration/comment.test.js
+# etc.
+```
+
 ## Test Naming Convention
 
 All integration tests follow the naming convention: `*.test.js`
@@ -33,10 +41,26 @@ Tests are organized by feature area:
 
 ## Test Requirements
 
-These tests may require:
+⚠️ **IMPORTANT: These files are REAL API TESTS, not mock-based tests** ⚠️
 
-1. A valid GitHub token in the `.secrets/github.js` file or as an environment variable
-2. An active internet connection
-3. Allowance for real API calls to GitHub
+These integration tests:
 
-Some tests may be skipped in CI environments if they would modify real GitHub resources.
+1. **Require real GitHub credentials** in the `.secrets/github.js` file
+2. Make actual API calls to GitHub services
+3. May modify real GitHub repositories (add comments, labels, etc.)
+4. Must use valid GitHub tokens with appropriate permissions
+
+### Required Credentials
+
+The `.secrets/github.js` file must contain:
+
+```javascript
+module.exports = {
+  token: "your-github-personal-access-token",  // Required for GitHub API
+  owner: "repository-owner",                   // GitHub username/organization
+  repo: "repository-name",                     // GitHub repository name
+  tokenModel: "your-github-model-token"        // Required for GitHub Models API
+};
+```
+
+DO NOT replace these with mock values even during testing - these scripts are designed to test against the real GitHub API.
