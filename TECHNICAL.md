@@ -50,7 +50,9 @@ The configuration system supports different environments, but environments only 
 The project follows a standard organizational structure:
 
 ### Source Code (`src/` directory)
+
 Contains the core application functionality, including:
+
 - Main application logic and entry points
 - API client implementations
 - Configuration management utilities
@@ -58,15 +60,20 @@ Contains the core application functionality, including:
 - **Unit tests** are placed directly next to the source files they test
 
 ### Integration Tests (`test-integration/` directory)
+
 Contains tests that verify interactions between multiple components, including:
+
 - API interaction tests
 - Multi-module workflow tests
 
 ### End-to-End Tests (`test-e2e/` directory)
+
 Contains tests that verify complete workflows from the user's perspective.
 
 ### Maintenance Scripts (`scripts/` directory)
+
 Contains development and maintenance utilities:
+
 - Environment management utilities
 - Configuration testing utilities
 - Development workflow helpers
@@ -183,6 +190,7 @@ While some projects mock external APIs for integration tests, this project delib
 4. **Discovery**: Tests can uncover changes in API behavior or unexpected edge cases
 
 This approach means:
+
 - Integration tests require valid GitHub credentials
 - Tests may occasionally fail due to API rate limits or changes
 - Tests may create real comments or labels on GitHub repositories
@@ -190,6 +198,7 @@ This approach means:
 #### When Mocks Are Appropriate
 
 Unit tests (in the `src/` directory) may still use mocks when:
+
 - Testing error handling paths that are difficult to trigger with real APIs
 - Isolating specific functions from their dependencies
 - Testing edge cases or race conditions
@@ -227,6 +236,7 @@ This project follows a pragmatic approach suitable for smaller applications:
 ### Testing Strategy Alignment
 
 The testing strategy is designed for this project's specific needs:
+
 - Integration tests with real APIs are preferred over complex mocking
 - Direct tests that make actual API calls provide higher confidence
 - Simplified test structure appropriate for project size
