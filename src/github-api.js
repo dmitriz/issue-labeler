@@ -399,6 +399,9 @@ async function updateIssue({
   if (state !== undefined) data.state = state;
   if (labels !== undefined) data.labels = labels;
   if (assignees !== undefined) data.assignees = assignees;
+  if (Object.keys(data).length === 0) {
+    throw new Error('At least one update field must be provided');
+  }
   
   try {
     const response = await githubClient.patch(`/repos/${safeOwner}/${safeRepo}/issues/${issue_number}`, data);
