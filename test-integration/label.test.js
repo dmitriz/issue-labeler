@@ -2,6 +2,14 @@ const { addLabelsToIssue } = require('../src/github-api');
 
 console.log('==== LABEL TEST STARTED ====');
 
+// Check for GitHub credentials first
+try {
+  require('../.secrets/github');
+} catch (error) {
+  console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
+  process.exit(0); // Exit gracefully
+}
+
 // Make the async function and call it immediately
 (async function() {
   try {

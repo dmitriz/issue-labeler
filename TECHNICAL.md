@@ -7,13 +7,13 @@ This document provides high-level technical documentation for the GitHub Issue L
 1. [Project Overview](#project-overview)
 2. [Architecture](#architecture)
 3. [Key Components](#key-components)
-4. [Configuration System](#configuration-system)
-5. [Environment Management](#environment-management)
-6. [Secrets Management](#secrets-management)
-7. [Main Workflows](#main-workflows)
-8. [Testing](#testing)
-9. [How to Extend](#how-to-extend)
-10. [Documentation Maintenance](#documentation-maintenance)
+4. [Project Organization](#project-organization)
+5. [Configuration System](#configuration-system)
+6. [Environment Management](#environment-management)
+7. [Secrets Management](#secrets-management)
+8. [Main Workflows](#main-workflows)
+9. [Testing Strategy](#testing-strategy)
+10. [How to Extend](#how-to-extend)
 
 ## Project Overview
 
@@ -29,8 +29,7 @@ The configuration system supports different environments, but environments only 
 
 ### 1. API Clients
 
-- **GitHub API Clients**: Handle interactions with GitHub's REST API
-- **Issue Fetcher**: Specialized client for fetching GitHub issue content
+- **GitHub API**: Handles interactions with GitHub's REST API
 - **LLM Client**: Manages communication with the LLM for issue analysis
 
 ### 2. Configuration
@@ -44,6 +43,37 @@ The configuration system supports different environments, but environments only 
 - **Core Labeling Logic**: Orchestrates the issue labeling workflow
 - **Prompt Management**: Templates for communicating with the LLM
 - **Response Processing**: Handling and interpreting LLM responses
+
+## Project Organization
+
+The project follows a clear organizational structure with strict separation between different types of code:
+
+### Source Code (`src/` directory)
+Contains all application functionality intended for users, including:
+- Core application logic
+- API client implementations
+- Configuration management
+- User-facing CLI tools
+- **Unit tests** are placed directly next to the source files they test
+
+### Integration Tests (`test-integration/` directory)
+Contains tests that verify interactions between multiple components, including:
+- API interaction tests
+- Multi-module workflow tests
+- Database integration tests (if applicable)
+
+### End-to-End Tests (`test-e2e/` directory)
+Contains tests that verify complete workflows from start to finish, including:
+- Complete CLI workflow tests
+- Full labeling process tests
+
+### Maintenance Scripts (`scripts/` directory)
+Contains development and maintenance utilities NOT intended for end users:
+- Environment management utilities
+- Development workflow helpers
+- Configuration testing utilities
+
+This separation ensures clear distinction between user-facing functionality and internal maintenance utilities.
 
 ## Configuration System
 
@@ -93,7 +123,7 @@ Authentication tokens and other sensitive information are stored separately from
 
 Developers can easily switch the target repository without changing code by toggling between environments with a simple command.
 
-## Testing
+## Testing Strategy
 
 The project includes various test scripts for different components and integration points.
 

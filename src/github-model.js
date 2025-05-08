@@ -8,10 +8,6 @@ const configLoader = require('./config-loader');
 const fs = require('fs');
 const path = require('path');
 
-// Load configuration - use central config instead of separate files
-const modelConfig = configLoader.getModelConfig();
-const apiConfig = configLoader.getApiConfig();
-
 // Get token from .secrets first
 let token;
 try {
@@ -24,9 +20,16 @@ try {
     token = require('../.secrets/github').token;
   }
 } catch (error) {
-  console.error('Failed to load secrets:', error.message);
-  process.exit(1);
+  // Fall back to environment variable
+  token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.warn('Failed to load GitHub token from secrets or environment:', error.message);
+  }
 }
+
+// Load configuration - use central config instead of separate files
+const modelConfig = configLoader.getModelConfig();
+const apiConfig = configLoader.getApiConfig();
 
 // Create a reusable axios instance with keepAlive enabled
 const axiosInstance = axios.create({
@@ -173,5 +176,11 @@ function handleModelError(error) {
 
 module.exports = {
   callModel,
-  callGithubModel
+  callGithubModel,
+  
+  // Expose internal functions for testing
+  __test__: {
+    parseModelResponse,
+    cleanModelResponse
+  }
 };

@@ -4,8 +4,8 @@
  * It fetches issue content, uses a model to determine urgency and importance,
  * and then applies those labels to the issue.
  */
-const { getIssueContent, applyLabels } = require('../src/github-api-client');
-const { callModel } = require('../src/github-model');
+const { getIssueContent, applyLabels } = require('./github-api');
+const { callModel } = require('./github-model');
 const fs = require('fs');
 const path = require('path');
 const { Command } = require('commander');

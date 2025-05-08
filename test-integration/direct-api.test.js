@@ -1,9 +1,19 @@
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+// Try to load GitHub credentials but don't modify the file
 let token, owner, repo;
 try {
-  ({ token, owner, repo } = require('../.secrets/github'));
-  if (!token || !owner || !repo) {
-    throw new Error('Missing required GitHub credentials');
+  // Use the existing .secrets/github.js file exactly as it is
+  const credentials = require('../.secrets/github');
+  token = credentials.token;
+  owner = credentials.owner || 'dmitriz';
+  repo = credentials.repo || 'issue-labeler';
+  
+  // Simple validation
+  if (!token) {
+    throw new Error('GitHub token not found in .secrets/github.js');
   }
 } catch (error) {
   console.error('Error loading GitHub credentials:', error.message);
@@ -16,6 +26,7 @@ console.log(`Repo: ${repo}`);
 console.log(`Token: [REDACTED]`);
 console.log(`Full URL: https://api.github.com/repos/${owner}/${repo}/issues`);
 console.log('==================================');
+
 // Using a simple axios call directly
 axios.get(`https://api.github.com/repos/${owner}/${repo}/issues`, {
   headers: { 

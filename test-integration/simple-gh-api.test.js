@@ -1,4 +1,12 @@
-const { fetchIssues } = require('../src/github-api');
+const { listIssues } = require('../src/github-api');
+
+// Check for GitHub credentials first
+try {
+  require('../.secrets/github');
+} catch (error) {
+  console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
+  process.exit(0); // Exit gracefully
+}
 
 // Simple promise-based timeout to detect if the API call is hanging
 const timeout = (ms) => new Promise((_, reject) =>
@@ -11,7 +19,7 @@ const timeout = (ms) => new Promise((_, reject) =>
     console.log('Starting API test...');
     // Race between the API call and a 10-second timeout
     const issues = await Promise.race([
-      fetchIssues({}),
+      listIssues({}),
       timeout(10000)  // 10-second timeout
     ]);
     

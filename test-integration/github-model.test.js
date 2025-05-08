@@ -4,6 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const { callGithubModel } = require('../src/github-model');
 
+// Check for GitHub credentials first
+try {
+  require('../.secrets/github');
+} catch (error) {
+  console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
+  process.exit(0); // Exit gracefully
+}
+
 function validateIssue(issue) {
   if (!issue.title || typeof issue.title !== 'string') {
     throw new Error('Invalid issue: title must be a non-empty string');

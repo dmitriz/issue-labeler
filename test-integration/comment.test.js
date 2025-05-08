@@ -1,13 +1,21 @@
-const { commentOnIssue } = require('../src/github-api');
+const { commentOnIssue, listIssues } = require('../src/github-api');
 
 console.log('==== COMMENT TEST STARTED ====');
 
 // Make the async function and call it immediately
 (async function() {
   try {
-    // Get the first open issue from the fetchIssues function
-    const { fetchIssues } = require('../src/github-api');
-    const issues = await fetchIssues({ state: 'open' });
+    // Check if we have GitHub credentials before attempting to run the test
+    try {
+      require('../.secrets/github');
+    } catch (error) {
+      console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
+      process.exit(0); // Exit gracefully
+      return;
+    }
+    
+    // Get the first open issue using listIssues instead of fetchIssues
+    const issues = await listIssues({ state: 'open' });
     
     if (issues.length === 0) {
       console.log('No open issues found. Skipping comment test.');

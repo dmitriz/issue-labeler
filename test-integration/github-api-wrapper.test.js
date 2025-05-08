@@ -1,5 +1,16 @@
-const { fetchIssues, addLabelsToIssue, commentOnIssue } = require('../src/github-api');
-const { token, owner, repo } = require('../.secrets/github');
+const { listIssues, addLabelsToIssue, commentOnIssue } = require('../src/github-api');
+
+// Try to load GitHub credentials
+let token, owner, repo;
+try {
+  const credentials = require('../.secrets/github');
+  token = credentials.token;
+  owner = credentials.owner;
+  repo = credentials.repo;
+} catch (error) {
+  console.log('Skipping test: GitHub credentials not found. Create .secrets/github.js to run this test.');
+  process.exit(0); // Exit gracefully
+}
 
 // Set up process error handling
 process.on('uncaughtException', (error) => {
@@ -17,7 +28,7 @@ process.on('uncaughtException', (error) => {
     });
     
     console.log('Fetching issues...');
-    const issues = await fetchIssues({});
+    const issues = await listIssues({});
     console.log('Open issues:', issues.map(i => `#${i.number}: ${i.title}`));
 
     const targetIssue = issues[0];
