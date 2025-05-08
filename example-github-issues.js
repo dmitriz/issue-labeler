@@ -2,10 +2,9 @@
  * Example usage of the GitHub Issues API wrapper
  */
 
-const githubIssues = require('./utils/github-issues');
+const githubIssues = require('./src/github-issues');
 
 async function main() {
-  // Configuration for the target repository
   // Configuration for the target repository
   const owner = process.env.GITHUB_OWNER || 'dmitriz';
   const repo = process.env.GITHUB_REPO || 'issue-labeler';

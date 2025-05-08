@@ -1,7 +1,7 @@
 const axios = require('axios');
 let token, owner, repo;
 try {
-  ({ token, owner, repo } = require('./.secrets/github'));
+  ({ token, owner, repo } = require('../.secrets/github'));
   if (!token || !owner || !repo) {
     throw new Error('Missing required GitHub credentials');
   }

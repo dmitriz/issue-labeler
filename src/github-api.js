@@ -3,7 +3,22 @@
  * Provides functions for fetching issues, adding labels, and commenting on issues
  */
 const axios = require('axios');
-const { token, owner, repo } = require('../.secrets/github');
+const configLoader = require('./config-loader');
+
+// Get repository info from config
+const repoConfig = configLoader.getRepositoryConfig();
+const owner = repoConfig.owner;
+const repo = repoConfig.repo;
+
+// Get token from secrets
+let token;
+try {
+  const secrets = require('../.secrets/github');
+  token = secrets.token;
+} catch (error) {
+  console.warn('Failed to load GitHub token from secrets:', error.message);
+}
+
 if (!token || !owner || !repo) {
   throw new Error('Missing GitHub configuration: token, owner, and repo are required');
 }

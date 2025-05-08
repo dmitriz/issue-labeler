@@ -1,41 +1,38 @@
 /**
- * GitHub API wrapper for the issue labeling workflow
+ * GitHub API client for the issue labeling workflow
  * Centralizes error handling and API configuration for reliable GitHub interactions.
- * Use this wrapper instead of direct API calls to ensure consistent error handling and rate limit management.
+ * Use this client instead of direct API calls to ensure consistent error handling and rate limit management.
  */
 const axios = require('axios');
 const https = require('https');
+const config = require('./config');
 
 // Use environment variables for sensitive credentials
 const token = process.env.GITHUB_TOKEN;
 
-const github = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    Authorization: `Bearer ${token}`,
-    Accept: 'application/vnd.github.v3+json',
-    'User-Agent': 'issue-labeler-app'
-  },
-  timeout: 5000,
-  httpsAgent: new https.Agent({ keepAlive: true })
-});
+/**
+ * Validates GitHub path segments to prevent path traversal attacks
+ * @param {string} segment - Path segment to validate
+ * @returns {string} - The validated segment
+ */
+function validatePathSegment(segment) {
   if (!/^[\w.-]+$/.test(segment)) {
-    throw new Error('Invalid path segment');
+    throw new Error(`Invalid path segment: "${segment}". Path segments must only contain alphanumeric characters, dashes, underscores, or periods.`);
   }
   return segment;
 }
 
 const github = axios.create({
-  baseURL: BASE_URL,
+  baseURL: config.github.baseUrl,
   headers: {
     Authorization: `token ${token}`,
     Accept: 'application/vnd.github.v3+json',
     'User-Agent': 'issue-labeler-app'
   },
-  timeout: GITHUB_API_TIMEOUT_MS,
+  timeout: config.github.timeoutMs,
   httpsAgent: new https.Agent({
     keepAlive: true,
-    maxSockets: 100 // Limit the maximum concurrent connections
+    maxSockets: config.github.maxSockets
   })
 });
 

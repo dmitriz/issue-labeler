@@ -1,4 +1,4 @@
-const { commentOnIssue } = require('./scripts/github-api');
+const { commentOnIssue } = require('../src/github-api');
 
 console.log('==== COMMENT TEST STARTED ====');
 
@@ -6,7 +6,7 @@ console.log('==== COMMENT TEST STARTED ====');
 (async function() {
   try {
     // Get the first open issue from the fetchIssues function
-    const { fetchIssues } = require('./scripts/github-api');
+    const { fetchIssues } = require('../src/github-api');
     const issues = await fetchIssues({ state: 'open' });
     
     if (issues.length === 0) {

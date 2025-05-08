@@ -1,4 +1,4 @@
-const { fetchIssues } = require('./scripts/github-api');
+const { fetchIssues } = require('../src/github-api');
 
 console.log('==== FETCH ONLY TEST STARTED ====');
 

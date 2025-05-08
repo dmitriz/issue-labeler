@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { callGithubModel } = require('./lib/githubModel');
+const { callGithubModel } = require('./github-model');
 
 // Load the prompt template and config
 const promptTemplate = fs.readFileSync('prompts/label-template.txt', 'utf-8');

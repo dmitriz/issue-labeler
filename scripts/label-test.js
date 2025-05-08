@@ -1,4 +1,4 @@
-const { addLabelsToIssue } = require('./scripts/github-api');
+const { addLabelsToIssue } = require('../src/github-api');
 
 console.log('==== LABEL TEST STARTED ====');
 
