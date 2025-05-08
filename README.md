@@ -13,7 +13,7 @@ A tool that automatically assigns labels (urgency and importance) to GitHub issu
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/issue-labeler.git
+
 cd issue-labeler
 
 # Install dependencies
@@ -22,6 +22,9 @@ npm install
 # Set up GitHub credentials (required for API access)
 mkdir -p .secrets
 echo "module.exports = { token: 'your-github-token', owner: 'your-username', repo: 'your-repo' };" > .secrets/github.js
+# Note: Use a token with appropriate permissions and keep it confidential
+# See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+echo ".secrets" >> .gitignore
 ```
 
 ## Usage
@@ -42,25 +45,6 @@ npm run select-next
 
 ## Project Structure
 
-The project follows a clear organizational structure:
-
-```
-issue-labeler/
-├── config.js                # Main configuration file
-├── src/                     # Source code
-│   ├── github-api.js        # GitHub API client
-│   ├── github-model.js      # LLM client for issue analysis
-│   ├── config-loader.js     # Configuration utilities
-│   ├── label-issue.js       # CLI for labeling issues
-│   ├── labeler.js           # Core labeling logic
-│   ├── select-next.js       # CLI for next issue selection
-│   └── *.test.js            # Unit tests adjacent to source files
-├── test-integration/        # Integration tests
-├── test-e2e/                # End-to-end tests
-├── scripts/                 # Maintenance scripts
-└── prompts/                 # LLM prompt templates
-```
-
 For detailed technical documentation, see [TECHNICAL.md](./TECHNICAL.md).
 
 ## Testing
@@ -78,10 +62,6 @@ npm run test:e2e
 # Run all tests
 npm test
 ```
-
-## License
-
-ISC
 
 ## Contributing
 

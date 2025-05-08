@@ -35,3 +35,4 @@ As per our project organization principles documented in TECHNICAL.md:
    - Unit tests: Next to source files in `src/`
    - Integration tests: In `test-integration/`
    - End-to-end tests: In `test-e2e/`
+   
