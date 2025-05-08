@@ -4,21 +4,24 @@
   "description": "This tool automatically suggests urgency and importance labels for GitHub issues using a lightweight prompt-based script. It will be extended to use GitHub Models API.",
   "main": "src/labeler.js",
   "scripts": {
-    "test": "echo \"Running all tests...\" && npm run test:config && npm run test:github-model && npm run test:gh-api && npm run test:minimal",
     "start": "node src/labeler.js",
-    "select": "node scripts/select-next.js",
+    "label-issue": "node src/label-issue.js",
+    "select-next": "node src/select-next.js",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "mocha \"src/**/*.test.js\"",
+    "test:integration": "mocha \"test-integration/**/*.test.js\"",
+    "test:e2e": "mocha \"test-e2e/**/*.e2e.test.js\"",
     "toggle-env": "node scripts/toggle-env.js",
     "env:status": "node scripts/test-config.js",
-    "test:github-model": "node scripts/test-github-model.js",
-    "test:gh-api": "node scripts/test-gh-api-wrapper.js",
-    "test:config": "node scripts/test-config.js",
-    "test:label": "node scripts/label-test.js",
-    "test:comment": "node scripts/comment-test.js",
-    "test:fetch": "node scripts/fetch-only-test.js",
-    "test:minimal": "node scripts/minimal-test.js",
-    "test:direct-api": "node scripts/direct-api-test.js",
-    "test:simple": "node scripts/simple-gh-api-test.js",
-    "example:github-issues": "node example-github-issues.js"
+    "run:comment-test": "node test-integration/comment.test.js",
+    "run:direct-api-test": "node test-integration/direct-api.test.js",
+    "run:fetch-only-test": "node test-integration/fetch-only.test.js",
+    "run:github-api-test": "node test-integration/github-api-wrapper.test.js",
+    "run:model-test": "node test-integration/github-model.test.js",
+    "run:label-test": "node test-integration/label.test.js",
+    "run:minimal-test": "node test-integration/minimal.test.js",
+    "run:simple-test": "node test-integration/simple-gh-api.test.js",
+    "run:all-integration": "npm run run:comment-test && npm run run:direct-api-test && npm run run:fetch-only-test && npm run run:github-api-test && npm run run:model-test && npm run run:label-test && npm run run:minimal-test && npm run run:simple-test"
   },
   "repository": {
     "type": "git",
@@ -33,6 +36,10 @@
   "homepage": "https://github.com/dmitriz/issue-labeler#readme",
   "dependencies": {
     "axios": "^1.9.0",
+    "commander": "^13.1.0",
     "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
   }
 }

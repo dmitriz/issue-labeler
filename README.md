@@ -1,58 +1,68 @@
-# Issue Labeler
+# GitHub Issue Labeler
 
-This tool automatically suggests urgency and importance labels for GitHub issues using a lightweight prompt-based script. It will be extended to use GitHub Models API.
+A tool that automatically assigns labels (urgency and importance) to GitHub issues using AI. It connects to the GitHub API, fetches issue content, processes it with a large language model (LLM), and applies appropriate labels based on the content.
+
+## Key Features
+
+- Automated issue labeling based on content analysis
+- Support for urgency and importance categorization
+- Command-line interface for labeling specific issues
+- Utility for selecting the next issue to work on based on priority
+
+## Installation
+
+```bash
+# Clone the repository
+
+cd issue-labeler
+
+# Install dependencies
+npm install
+
+# Set up GitHub credentials (required for API access)
+mkdir -p .secrets
+echo "module.exports = { token: 'your-github-token', owner: 'your-username', repo: 'your-repo' };" > .secrets/github.js
+# Note: Use a token with appropriate permissions and keep it confidential
+# See: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+echo ".secrets" >> .gitignore
+```
 
 ## Usage
 
-First, install the dependencies:
+### Label an issue
 
 ```bash
-npm install
+npm run label-issue -- 123
 ```
 
-Run the labeler:
+Where `123` is the issue number you want to label.
+
+### Select next issue to work on
 
 ```bash
-# Directly with Node.js
-node labeler.js
-
-# Using NPM script
-npm start
+npm run select-next
 ```
 
-## Environment Management
+## Project Structure
 
-The application supports both testing and production environments:
+For detailed technical documentation, see [TECHNICAL.md](./TECHNICAL.md).
+
+## Testing
 
 ```bash
-# Check current environment status
-npm run env:status
+# Run unit tests
+npm run test:unit
 
-# Switch between testing and production environments
-npm run toggle-env
+# Run integration tests (requires GitHub credentials)
+npm run test:integration
+
+# Run end-to-end tests (requires GitHub credentials)
+npm run test:e2e
+
+# Run all tests
+npm test
 ```
 
-## Documentation
+## Contributing
 
-For detailed information about the repository organization, architecture, and how to extend the application:
-
-- [**Technical Documentation**](TECHNICAL.md) - Comprehensive guide to the codebase structure and functionality
-- [GitHub API Client](github-api-client.js) - Core API client for GitHub interactions
-- [Configuration System](config.js) - Central configuration file for all settings
-
-## Configuration
-
-All configuration, including repository targeting, is managed through the `config.js` file. To target a different repository, simply modify the appropriate environment section in this file:
-
-```javascript
-environments: {
-  production: {
-    active: false,
-    repository: {
-      owner: 'your-org-name',
-      repo: 'your-repo-name',
-      useLocalIssues: false
-    }
-  }
-}
-```
+Contributions are welcome! Please see our contributing guidelines for details.
