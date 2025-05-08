@@ -8,7 +8,7 @@ const configLoader = require('./config-loader');
 const fs = require('fs');
 const path = require('path');
 
-// Load configuration 
+// Load configuration - use central config instead of separate files
 const modelConfig = configLoader.getModelConfig();
 const apiConfig = configLoader.getApiConfig();
 
@@ -83,7 +83,7 @@ async function callModel(prompt) {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: modelConfig.id,
+      model: modelConfig.name,
       temperature: modelConfig.temperature,
       max_tokens: modelConfig.maxTokens
     }, {
@@ -123,7 +123,7 @@ async function callGithubModel({ prompt }) {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: modelConfig.id,
+      model: modelConfig.name,
       temperature: modelConfig.temperature,
       max_tokens: modelConfig.maxTokens
     }, {

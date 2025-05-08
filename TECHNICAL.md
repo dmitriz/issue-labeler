@@ -1,6 +1,6 @@
 # GitHub Issue Labeler - Technical Documentation
 
-This document provides comprehensive technical documentation for the GitHub Issue Labeler project, explaining its architecture, key components, and how to work with the codebase.
+This document provides high-level technical documentation for the GitHub Issue Labeler project, explaining its architecture, key components, and how to work with the codebase.
 
 ## Table of Contents
 
@@ -17,24 +17,11 @@ This document provides comprehensive technical documentation for the GitHub Issu
 
 ## Project Overview
 
-GitHub Issue Labeler is a tool that automatically assigns labels (urgency and importance) to GitHub issues using AI. It connects to the GitHub API, fetches issue content, processes it with a text model, and applies appropriate labels based on the content.
+GitHub Issue Labeler is a tool that automatically assigns labels (urgency and importance) to GitHub issues using AI. It connects to the GitHub API, fetches issue content, processes it with a large language model (LLM), and applies appropriate labels based on the content.
 
 ## Architecture
 
-The project follows a modular architecture with clear separation of concerns:
-
-```mermaid
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  GitHub API     │     │ Text Model API  │     │  Configuration  │
-│  (Data Source)  │◄────┤  (Processing)   │◄────┤    System       │
-└────────┬────────┘     └────────┬────────┘     └─────────────────┘
-         │                       │
-         ▼                       ▼
-┌─────────────────────────────────────────────────┐
-│                Issue Labeler                    │
-│            (Main Application Logic)             │
-└─────────────────────────────────────────────────┘
-```
+The project follows a modular architecture with clear separation of concerns between GitHub API integration, LLM processing, and configuration management. The application core orchestrates these components to analyze and label GitHub issues.
 
 The configuration system supports different environments, but environments only affect the target repository - all other configuration settings are environment-independent and defined directly in the config.js file.
 
@@ -42,143 +29,83 @@ The configuration system supports different environments, but environments only 
 
 ### 1. API Clients
 
-- **`github-api-client.js`**: Core API client for interacting with GitHub
-- **`github-issue-fetcher.js`**: Specialized client for fetching GitHub issues
-- **`github-model.js`**: Client for the AI model that determines labels
+- **GitHub API Clients**: Handle interactions with GitHub's REST API
+- **Issue Fetcher**: Specialized client for fetching GitHub issue content
+- **LLM Client**: Manages communication with the LLM for issue analysis
 
 ### 2. Configuration
 
-- **`config.js`**: Central configuration file that exports settings as a JavaScript object
-- **`config-loader.js`**: Utility to load, validate, and modify configuration
+- **Central Configuration**: A single source of truth for application settings
+- **Configuration Loader**: Utilities for accessing and modifying configuration
+- **Environment Management**: Tools for switching between target repositories
 
-### 3. Environment Management
+### 3. Application Logic
 
-- **`scripts/toggle-env.js`**: Script to toggle between testing/production environments
-- **`test-config.js`**: Utility to display current environment configuration
-
-### 4. Application Logic
-
-- **`label-issue.js`**: Main script that orchestrates the labeling workflow
-- **`labeler.js`**: Core logic for sending issues to the model and processing results
+- **Core Labeling Logic**: Orchestrates the issue labeling workflow
+- **Prompt Management**: Templates for communicating with the LLM
+- **Response Processing**: Handling and interpreting LLM responses
 
 ## Configuration System
 
-The application uses a JavaScript-based configuration system to support comments and better readability.
+The application uses a unified configuration system with JavaScript modules for better readability and maintainability.
 
 ### Configuration Structure
 
-The configuration is structured into logical sections:
+The configuration is organized into logical sections:
+- **Environments**: Defines different repository targets (testing vs. production)
+- **GitHub API Settings**: Connection parameters for GitHub
+- **LLM Settings**: Model selection and parameters
 
-```javascript
-// High-level structure of config.js
-module.exports = {
-  // Environment configurations (ONLY affects repository targeting)
-  environments: {
-    // Different environments (testing, production, etc.)
-    // Each with its target repository information
-  },
-  
-  // GitHub API configuration (environment-independent)
-  github: {
-    // API connection settings
-  },
-  
-  // Model configuration (environment-independent)
-  model: {
-    // AI model settings
-  }
-};
-```
+### Configuration Management
 
-### Configuration Loader
-
-The `config-loader.js` file provides functions to:
-
-1. Get the active environment configuration
-2. Access specific configuration sections (repository, model, API)
-3. Switch between environments and persist changes to the config file
+The system provides utilities for:
+- Loading the appropriate configuration
+- Accessing specific configuration sections
+- Switching between environments (repository targets)
 
 ## Environment Management
 
-The system supports multiple environments with different repository targets. **Note that environments ONLY affect which repository is targeted - all other configuration settings remain the same across environments.**
+The system supports multiple environments with different repository targets. **Note that environments ONLY affect which repository is targeted - all other settings remain the same across environments.**
 
 Key features:
-
-1. **Toggle Command**: `npm run toggle-env` switches between environments
-2. **Status Command**: `npm run env:status` displays current environment status 
-3. **Persistence**: Environment changes are persisted to the config file
-
-### Environment Switching
-
-When switching environments:
-
-1. The `active` flag is toggled in the config file
-2. Repository targeting changes (owner/repo)
-3. All API calls automatically target the newly selected repository
+- Environment toggling (switch between test and production repositories)
+- Environment status display (see which repository is currently active)
+- Persistence of environment selection
 
 ## Secrets Management
 
-Secrets like API tokens are stored in a `.secrets` directory and imported directly:
+Authentication tokens and other sensitive information are stored separately from the main configuration:
 
-- `.secrets/github.js`: Contains GitHub authentication token
-- `.secrets/gh-model.js`: Contains model API token (if used separately)
-
-**Important**: Secrets should ONLY contain authentication tokens and other sensitive information. Repository targeting should be managed exclusively through `config.js`.
+- **Secrets Storage**: Sensitive values are kept in a separate `.secrets` directory
+- **Authentication**: API tokens for GitHub and the LLM service
+- **Separation of Concerns**: Repository information is managed through configuration, not secrets
 
 ## Main Workflows
 
 ### Issue Labeling Workflow
 
-1. Application fetches issue content from GitHub
-2. Issue content is sent to the model with a prompt template
-3. Model determines urgency and importance
-4. Labels are applied to the issue
+1. Fetch issue content from the targeted GitHub repository
+2. Process the issue with the configured LLM
+3. Extract label recommendations from the LLM response
+4. Apply recommended labels to the issue
 
-### Environment Toggling Workflow
+### Environment Switching
 
-1. `toggle-env.js` script identifies current active environment
-2. Switches active flag to the other environment
-3. Updates config.js file to persist the change
-4. Repository targeting automatically changes based on environment
+Developers can easily switch the target repository without changing code by toggling between environments with a simple command.
 
 ## Testing
 
-The project includes several test scripts:
-
-- **`test-github-model.js`**: Tests the model API client
-- **`test-config.js`**: Tests environment configuration
-- **`test-gh-api-wrapper.js`**: Tests GitHub API client
-- Other test files for specific functionality
+The project includes various test scripts for different components and integration points.
 
 ## How to Extend
 
-### Adding a New Environment
+### Adding New Environments
 
-1. Add a new environment object in the `environments` section of `config.js`:
-
-   ```javascript
-   staging: {
-     active: false,
-     repository: {
-       owner: 'staging-org',
-       repo: 'staging-repo',
-       useLocalIssues: false
-     }
-   }
-   ```
-
-2. Update the toggle script if you need to cycle through more than two environments
-
-### Adding New Model Providers
-
-1. Add the new provider configuration in the `model` section of `config.js`
-2. Update `github-model.js` to handle the new provider's API format
+New repository targets can be added to the environments section of the configuration.
 
 ### Modifying Label Categories
 
-1. Update the prompt template in `prompts/label-template.txt`
-2. Modify the parsing logic in `callModel()` function in `github-model.js`
-3. Update any UI or reporting tools to display the new labels
+The labeling system can be extended with new categories by updating prompt templates and response processing.
 
 ## Documentation Maintenance
 
@@ -186,10 +113,10 @@ The project includes several test scripts:
 
 ### Guidelines for Maintaining Documentation:
 
-1. **Update This Document**: Any significant structural changes to the codebase must be reflected in this documentation file.
+1. **Update This Document**: Any significant structural changes to the codebase must be reflected here.
 
-2. **Keep It High-Level**: This document should focus on the high-level architecture and concepts, not specific implementation details that may change frequently.
+2. **Keep It High-Level**: This document focuses on architecture and concepts, not implementation details.
 
-3. **Documentation First**: Consider updating this documentation as part of the planning phase for significant changes, not as an afterthought.
+3. **Documentation First**: Update documentation as part of the planning phase for significant changes.
 
-4. **Verification**: Periodically verify that this documentation matches the current codebase structure and functionality.
+4. **Verification**: Periodically verify that documentation matches the current codebase structure.
