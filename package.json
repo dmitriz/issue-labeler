@@ -7,7 +7,7 @@
     "start": "node src/labeler.js",
     "label-issue": "node src/label-issue.js",
     "select-next": "node src/select-next.js",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "mocha \"src/**/*.test.js\"",
     "test:integration": "mocha \"test-integration/**/*.test.js\"",
     "test:e2e": "mocha \"test-e2e/**/*.e2e.test.js\"",
