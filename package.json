@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/labeler.js",
     "label-issue": "node src/label-issue.js",
+    "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:unit": "mocha \"src/**/*.test.js\"",
@@ -35,9 +36,7 @@
   },
   "homepage": "https://github.com/dmitriz/issue-labeler#readme",
   "dependencies": {
-    "axios": "^1.9.0",
-    "commander": "^13.1.0",
-    "dotenv": "^16.0.0"
+    "axios": "^1.9.0"
   },
   "devDependencies": {
     "mocha": "^10.8.2"
