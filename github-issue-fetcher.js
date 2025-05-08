@@ -13,23 +13,20 @@ const configLoader = require('./config-loader');
  */
 
 // Load configuration
-const config = configLoader.loadConfig();
-const repoConfig = configLoader.getRepositoryConfig(config);
-const apiConfig = configLoader.getApiConfig(config);
+const repoConfig = configLoader.getRepositoryConfig();
+const apiConfig = configLoader.getApiConfig();
 
-// Ensure sensitive credentials are only accessed through environment variables
-if (!process.env.GITHUB_TOKEN) {
-  throw new Error('Missing required environment variable: GITHUB_TOKEN');
-}
-
-const token = process.env.GITHUB_TOKEN;
-
-// Get repository information from active environment configuration
+// Get credentials from .secrets, but repository info from config
+let token;
 const owner = repoConfig.owner;
 const repo = repoConfig.repo;
 
-if (!owner || !repo) {
-  throw new Error('Missing repository owner or name in active environment configuration');
+try {
+  const secretsConfig = require('./.secrets/github');
+  token = secretsConfig.token;
+} catch (error) {
+  console.error('Failed to load secrets:', error.message);
+  process.exit(1);
 }
 
 // Initialize GitHub API client with configuration
@@ -65,12 +62,6 @@ function handleGitHubError(error, context) {
   if (error.response) {
     console.error('API Error:', error.response.status, error.response.statusText);
     console.error('Error details:', error.response.data);
-    
-    // Handle rate limiting according to configuration
-    if (error.response.status === 429 && apiConfig.rateLimitHandling?.retryAfterRateLimit) {
-      const retryAfter = parseInt(error.response.headers['retry-after']) || apiConfig.rateLimitHandling.backoffMs / 1000;
-      console.warn(`Rate limit exceeded. Retry after ${retryAfter} seconds.`);
-    }
   }
   throw error;
 }
@@ -86,7 +77,6 @@ async function fetchIssues(endpoint) {
   if (repoConfig.useLocalIssues) {
     console.log('Using local test issues data');
     try {
-      // You would implement this function to return mock data for testing
       return getLocalIssues();
     } catch (error) {
       console.error('Failed to load local test issues:', error);
@@ -118,7 +108,6 @@ async function fetchIssues(endpoint) {
  * @returns {Array<GitHubIssue>} - Array of mock issues for testing
  */
 function getLocalIssues() {
-  // This could be expanded to load from a local JSON file or return hardcoded test data
   return [
     {
       id: 1,

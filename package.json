@@ -7,6 +7,8 @@
     "test": "echo \"Running all tests...\" && npm run test:config && npm run test:github-model && npm run test:gh-api && npm run test:minimal",
     "start": "node labeler.js",
     "select": "node scripts/select-next.js",
+    "toggle-env": "node scripts/toggle-env.js",
+    "env:status": "node test-config.js",
     "test:github-model": "node test-github-model.js",
     "test:gh-api": "node test-gh-api-wrapper.js",
     "test:config": "node test-config.js",

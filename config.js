@@ -1,53 +1,48 @@
 /**
- * Central configuration file for the GitHub issue labeler application
- * Contains all configurable parameters used across the application
+ * Central configuration for GitHub Issue Labeler
+ * Using JS format to allow comments and better readability
  */
 
 module.exports = {
   /**
-   * GitHub API configuration settings
+   * Environment configurations
+   * Only repository target changes between environments
+   */
+  environments: {
+    testing: {
+      active: true,
+      repository: {
+        owner: 'dmitriz',
+        repo: 'issue-labeler',
+        useLocalIssues: true
+      }
+    },
+    production: {
+      active: false, 
+      repository: {
+        owner: 'dmitriz',
+        repo: 'issue-hub',
+        useLocalIssues: false
+      }
+    }
+  },
+  
+  /**
+   * GitHub API configuration
    */
   github: {
-    /**
-     * Base URL for GitHub API
-     */
     baseUrl: 'https://api.github.com',
-    
-    /**
-     * API request timeout in milliseconds
-     */
     timeoutMs: 10000,
-    
-    /**
-     * Maximum concurrent connections
-     */
     maxSockets: 100
   },
   
   /**
-   * GitHub Model configuration settings
+   * Model configuration - same for all environments
    */
   model: {
-    /**
-     * The model identifier to use for inference
-     * Options: 'openai/gpt-4o', 'openai/gpt-4-turbo', etc.
-     */
-    modelId: 'openai/gpt-4o',
-    
-    /**
-     * Temperature setting for model inference (0.0 to 1.0)
-     * Lower values create more deterministic responses
-     */
+    id: 'openai/gpt-4o',
     temperature: 0.3,
-    
-    /**
-     * Maximum number of tokens to generate in the response
-     */
     maxTokens: 1000,
-    
-    /**
-     * API endpoint for model inference
-     */
     apiEndpoint: 'https://models.github.ai/inference/chat/completions'
   }
 };

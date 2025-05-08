@@ -4,20 +4,32 @@
  */
 const axios = require('axios');
 const https = require('https');
-const config = require('./config');
+const configLoader = require('./config-loader');
+const fs = require('fs');
+const path = require('path');
 
-// Use environment variables for sensitive credentials or fall back to local config
-const token = process.env.GITHUB_MODEL_TOKEN || require('./.secrets/github').token;
+// Load configuration 
+const modelConfig = configLoader.getModelConfig();
+const apiConfig = configLoader.getApiConfig();
 
-if (!token) {
-  console.error('GITHUB_MODEL_TOKEN environment variable is not set');
+// Get token from .secrets first
+let token;
+try {
+  // Check if we're using gh-model.js or github.js in the secrets folder
+  if (fs.existsSync(path.join(__dirname, '.secrets', 'gh-model.js'))) {
+    token = require('./.secrets/gh-model').token;
+  } else {
+    token = require('./.secrets/github').token;
+  }
+} catch (error) {
+  console.error('Failed to load secrets:', error.message);
   process.exit(1);
 }
 
 // Create a reusable axios instance with keepAlive enabled
 const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ keepAlive: true }),
-  timeout: config.github.timeoutMs || 10000
+  timeout: apiConfig.timeoutMs || 10000
 });
 
 // Regex for cleaning markdown code blocks
@@ -67,13 +79,13 @@ function cleanModelResponse(rawContent) {
  */
 async function callModel(prompt) {
   try {
-    const response = await axiosInstance.post(config.model.apiEndpoint, {
+    const response = await axiosInstance.post(modelConfig.apiEndpoint, {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: config.model.modelId,
-      temperature: config.model.temperature,
-      max_tokens: config.model.maxTokens
+      model: modelConfig.id,
+      temperature: modelConfig.temperature,
+      max_tokens: modelConfig.maxTokens
     }, {
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -107,13 +119,13 @@ async function callModel(prompt) {
  */
 async function callGithubModel({ prompt }) {
   try {
-    const response = await axiosInstance.post(config.model.apiEndpoint, {
+    const response = await axiosInstance.post(modelConfig.apiEndpoint, {
       messages: [
         { role: "user", content: prompt }
       ],
-      model: config.model.modelId,
-      temperature: config.model.temperature,
-      max_tokens: config.model.maxTokens
+      model: modelConfig.id,
+      temperature: modelConfig.temperature,
+      max_tokens: modelConfig.maxTokens
     }, {
       headers: {
         "Authorization": `Bearer ${token}`,

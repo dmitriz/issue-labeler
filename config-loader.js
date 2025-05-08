@@ -1,35 +1,21 @@
 /**
  * Configuration loader for issue-labeler
- * Handles loading environment-specific configurations from config.json
+ * Handles loading environment-specific configurations from config.js
  */
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
-// Default config file location
-const CONFIG_PATH = path.join(__dirname, 'config.json');
+// Config file path
+const CONFIG_PATH = path.join(__dirname, 'config.js');
 
-/**
- * Loads and validates the configuration
- * @param {string} [configPath=CONFIG_PATH] - Path to the config file
- * @returns {Object} - The loaded configuration object
- */
-function loadConfig(configPath = CONFIG_PATH) {
-  try {
-    const configRaw = fs.readFileSync(configPath, 'utf8');
-    const config = JSON.parse(configRaw);
-    validateConfig(config);
-    return config;
-  } catch (error) {
-    throw new Error(`Failed to load configuration: ${error.message}`);
-  }
-}
+// Import the config directly from JS file
+const config = require('./config');
 
 /**
  * Validates the configuration structure
- * @param {Object} config - The configuration object to validate
  * @throws {Error} If the configuration is invalid
  */
-function validateConfig(config) {
+function validateConfig() {
   if (!config.environments) {
     throw new Error('Missing "environments" section in configuration');
   }
@@ -48,83 +34,105 @@ function validateConfig(config) {
   if (activeEnvs.length > 1) {
     throw new Error(`Multiple active environments found: ${activeEnvs.join(', ')}. Only one environment can be active.`);
   }
+
+  return true;
 }
+
+// Run validation on load
+validateConfig();
 
 /**
  * Gets the currently active environment configuration
- * @param {Object} [config] - Optional pre-loaded config object
  * @returns {Object} - The active environment configuration
  */
-function getActiveEnvironment(config) {
-  const fullConfig = config || loadConfig();
-  const activeEnvKey = Object.keys(fullConfig.environments)
-    .find(key => fullConfig.environments[key].active);
+function getActiveEnvironment() {
+  const activeEnvKey = Object.keys(config.environments)
+    .find(key => config.environments[key].active);
   
   return {
     name: activeEnvKey,
-    ...fullConfig.environments[activeEnvKey]
+    ...config.environments[activeEnvKey]
   };
 }
 
 /**
  * Gets the repository configuration for the active environment
- * @param {Object} [config] - Optional pre-loaded config object
  * @returns {Object} - Repository configuration object
  */
-function getRepositoryConfig(config) {
-  return getActiveEnvironment(config).repository;
+function getRepositoryConfig() {
+  return getActiveEnvironment().repository;
 }
 
 /**
- * Gets the model configuration for the active environment
- * @param {Object} [config] - Optional pre-loaded config object
+ * Gets the model configuration (which is the same across environments)
  * @returns {Object} - Model configuration object
  */
-function getModelConfig(config) {
-  return getActiveEnvironment(config).model;
+function getModelConfig() {
+  return config.model;
 }
 
 /**
- * Gets the API configuration
- * @param {Object} [config] - Optional pre-loaded config object
+ * Gets the GitHub API configuration
  * @returns {Object} - API configuration object
  */
-function getApiConfig(config) {
-  const fullConfig = config || loadConfig();
-  return fullConfig.api;
+function getApiConfig() {
+  return config.github;
+}
+
+/**
+ * Gets the complete configuration
+ * @returns {Object} - Complete configuration object
+ */
+function getConfig() {
+  return config;
+}
+
+/**
+ * Helper to update config.js file content
+ * @param {Object} updatedConfig - The updated config to write
+ */
+function updateConfigFile(updatedConfig) {
+  // Read the current file content
+  let fileContent = fs.readFileSync(CONFIG_PATH, 'utf8');
+  
+  // For each environment, update its active state in the file
+  Object.keys(updatedConfig.environments).forEach(env => {
+    const active = updatedConfig.environments[env].active;
+    // Use regex to update the active property in the file
+    const pattern = new RegExp(`(${env}:\\s*{[^}]*active:\\s*)\\w+`, 'g');
+    fileContent = fileContent.replace(pattern, `$1${active}`);
+  });
+  
+  // Write the updated content back to the file
+  fs.writeFileSync(CONFIG_PATH, fileContent, 'utf8');
 }
 
 /**
  * Switches the active environment
  * @param {string} environmentName - The name of the environment to activate
- * @param {boolean} [persistChange=true] - Whether to save the change to the config file
  * @returns {Object} - The updated configuration object
  */
-function switchEnvironment(environmentName, persistChange = true) {
-  const config = loadConfig();
-  
+function switchEnvironment(environmentName) {
   if (!config.environments[environmentName]) {
     throw new Error(`Environment "${environmentName}" not found in configuration`);
   }
   
-  // Deactivate all environments
+  // Update in-memory config
   Object.keys(config.environments).forEach(key => {
-    config.environments[key].active = false;
+    config.environments[key].active = (key === environmentName);
   });
   
-  // Activate the requested environment
-  config.environments[environmentName].active = true;
+  // Persist changes to the config file
+  updateConfigFile(config);
   
-  // Save the updated configuration if requested
-  if (persistChange) {
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf8');
-  }
+  // Clear the require cache for config.js to reload on next require
+  delete require.cache[require.resolve('./config')];
   
   return config;
 }
 
 module.exports = {
-  loadConfig,
+  getConfig,
   getActiveEnvironment,
   getRepositoryConfig,
   getModelConfig,
