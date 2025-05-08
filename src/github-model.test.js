@@ -3,7 +3,6 @@
  * Tests the model inference functionality in isolation
  */
 const assert = require('assert');
-const assert = require('assert');
 const { callModel } = require('./github-model');
 
 describe('GitHub Model', () => {

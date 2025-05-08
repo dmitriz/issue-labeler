@@ -13,7 +13,6 @@
     "test:e2e": "mocha \"test-e2e/**/*.e2e.test.js\"",
     "toggle-env": "node scripts/toggle-env.js",
     "env:status": "node scripts/test-config.js",
-    
     "run:comment-test": "node test-integration/comment.test.js",
     "run:direct-api-test": "node test-integration/direct-api.test.js",
     "run:fetch-only-test": "node test-integration/fetch-only.test.js",
@@ -37,6 +36,7 @@
   "homepage": "https://github.com/dmitriz/issue-labeler#readme",
   "dependencies": {
     "axios": "^1.9.0",
+    "commander": "^13.1.0",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {

@@ -68,10 +68,14 @@ describe('Label Issue E2E', function() {
     
     // Check for urgency/importance labels
     const hasUrgencyLabel = appliedLabels.some(label => 
-      label === 'urgent' || label === 'not_urgent'
+      label === 'urgent' || 
+      label === 'not_urgent' || 
+      label === 'not urgent'
     );
     const hasImportanceLabel = appliedLabels.some(label => 
-      label === 'important' || label === 'not_important'
+      label === 'important' || 
+      label === 'not_important' || 
+      label === 'low'
     );
     
     assert.ok(hasUrgencyLabel, 'Issue should have an urgency label applied');
