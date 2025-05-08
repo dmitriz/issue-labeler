@@ -90,12 +90,12 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
 
     console.log(`Applying labels to issue #${issue.number}: ${newLabels.join(', ')}...`);
     await applyLabels({ 
-      issueNumber: issue.number, 
-      owner, 
-      repo, 
-      labels: newLabels 
-    });
-    
+      main({ issueNumber: issueNum, owner, repo })
+        .then(() => console.log('Issue labeling process completed successfully'))
+        .catch(err => {
+          console.error('Fatal error:', err && err.message ? err.message : err);
+          process.exit(1);
+        });
     console.log(`Successfully labeled issue #${issue.number} with: ${newLabels.join(', ')}`);
     return { 
       issue: issue.number, 
