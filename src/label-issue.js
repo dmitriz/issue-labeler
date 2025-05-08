@@ -52,6 +52,8 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     const labelConfig = configLoader.getLabelConfig();
     const allowedLabels = labelConfig.allowedLabels || [];
     
+    console.log(`Using allowed labels: ${allowedLabels.join(', ')}`);
+    
     // Prepare the prompt by replacing the placeholders with actual issue content
     const prompt = template
       .replace('{{title}}', issue.title)
@@ -78,22 +80,27 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     }
     
     const { urgency, importance } = modelResult;
-    console.log(`Model result for issue #${issue.number}: urgency=${urgency}, importance=${importance}`);
+    console.log(`Model result for issue #${issue.number}: urgency=${urgency || 'none'}, importance=${importance || 'none'}`);
 
     // Create and apply ONLY allowed labels
     const labels = [];
     if (urgency && allowedLabels.includes(urgency.toLowerCase())) {
-      labels.push(urgency);
+      labels.push(urgency.toLowerCase());
     }
     if (importance && allowedLabels.includes(importance.toLowerCase())) {
-      labels.push(importance);
+      labels.push(importance.toLowerCase());
     }
 
     console.log(`Filtered labels for issue #${issue.number}: ${labels.join(', ') || 'none'}`);
 
     if (labels.length === 0) {
-      console.warn(`No allowed labels determined for issue #${issue.number}.`);
-      return { issue: issue.number, success: false, reason: 'no_allowed_labels_determined' };
+      console.log(`No allowed labels determined for issue #${issue.number}. Skipping.`);
+      return { 
+        issue: issue.number, 
+        success: true, // Mark as success to prevent errors in batch processing
+        reason: 'no_allowed_labels_determined',
+        action: 'skipped_no_allowed_labels'
+      };
     }
 
     // Check if the issue already has these labels to avoid unnecessary API calls

@@ -81,14 +81,21 @@ function getApiConfig() {
 
 /**
  * Gets the label configuration
- * @returns {Object} - Label configuration object with default empty allowedLabels if not configured
+ * @returns {Object} - Label configuration object with default allowed labels if not configured
  */
 function getLabelConfig() {
   const labelConfig = config.labels;
   if (!labelConfig) {
-    console.warn('Warning: Label configuration is missing in config.js.  No labels will be applied.');
-    return { allowedLabels: [] };
+    console.warn('Warning: Label configuration is missing in config.js. Only using urgent and important labels.');
+    return { allowedLabels: ['urgent', 'important'] };
   }
+  
+  // Make sure we always have an allowedLabels array, defaulting to urgent and important
+  if (!labelConfig.allowedLabels || !Array.isArray(labelConfig.allowedLabels) || labelConfig.allowedLabels.length === 0) {
+    console.warn('Warning: allowedLabels is not properly defined in config.js. Only using urgent and important labels.');
+    labelConfig.allowedLabels = ['urgent', 'important'];
+  }
+  
   return labelConfig;
 }
 
