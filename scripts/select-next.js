@@ -1,11 +1,9 @@
 const { getAllOpenIssues, getIssuesWithLabel } = require('../lib/github');
 
 /**
- * Select the next issue to work on based on priority rules:
- * 1. Filter by urgent label if available
- * 2. From resulting list, filter by important label if available
- * 3. Pick most recently updated issue from final list
- * 4. If no open issues, show appropriate message
+ * Selects the next GitHub issue to work on by prioritizing issues labeled "urgent" and "important", then choosing the most recently updated one.
+ *
+ * The function retrieves all open issues, filters for "urgent" issues if any exist, then further filters for "important" issues within the current set. It sorts the resulting issues by their last update time in descending order and logs details of the top issue. If no open issues are found, it logs an appropriate message.
  */
 async function selectNext() {
   // Get all open issues
