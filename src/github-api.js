@@ -152,7 +152,7 @@ function createGitHubClient(providedToken = token, allowNoAuth = false) {
     timeout: apiConfig.timeoutMs || 10000,
     httpsAgent: new https.Agent({
       keepAlive: true,
-      maxSockets: apiConfig.maxSockets || 5
+      maxSockets: apiConfig.maxSockets || 10
     })
   });
 }
