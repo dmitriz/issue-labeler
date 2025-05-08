@@ -1,4 +1,4 @@
-const { getAllOpenIssues, getIssuesWithLabel } = require('../lib/github');
+const { getAllOpenIssues, getIssuesWithLabel } = require('../github-issue-fetcher');
 
 /**
  * Select the next issue to work on based on priority rules:
