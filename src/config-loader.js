@@ -80,8 +80,11 @@ function getApiConfig() {
 }
 
 /**
- * Gets the label configuration
- * @returns {Object} - Label configuration object with default allowed labels if not configured
+ * Retrieves the label configuration, ensuring a non-empty list of allowed labels.
+ *
+ * If the label configuration or its `allowedLabels` property is missing, invalid, or empty, returns a default configuration with `allowedLabels` set to `['urgent', 'important']`.
+ *
+ * @returns {Object} The label configuration object with a guaranteed non-empty `allowedLabels` array.
  */
 function getLabelConfig() {
   const labelConfig = config.labels;
