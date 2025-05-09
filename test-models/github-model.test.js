@@ -119,8 +119,9 @@ describe('GitHub Models API Integration', function() {
         
         // Validate response structure
         assert.ok(
-          parsedResponse.hasOwnProperty('urgency') && 
-          parsedResponse.hasOwnProperty('importance'),
+        assert.ok(
+          Object.hasOwn(parsedResponse, 'urgency') && 
+          Object.hasOwn(parsedResponse, 'importance'),
           'Response should contain urgency and importance properties'
         );
         
