@@ -91,14 +91,30 @@ describe('Label Issue E2E', function() {
       const updatedIssue = await api.getIssue({ issue_number: TEST_ISSUE_NUMBER });
       const appliedLabels = updatedIssue.labels.map(l => l.name);
       
-      // Check if any of our allowed labels were applied
-      const hasAllowedLabel = appliedLabels.some(label => 
-        allowedLabels.includes(label.toLowerCase())
+      // Check if any of our allowed labels were applied (case insensitive)
+      const hasAllowedLabel = appliedLabels.some(appliedLabel => 
+        allowedLabels.some(allowedLabel => 
+          allowedLabel.toLowerCase() === appliedLabel.toLowerCase()
+        )
       );
       
       if (hasAllowedLabel) {
         // Test passes if allowed labels were applied
         assert.ok(true, 'Issue has allowed labels applied');
+        
+        // Verify case insensitivity in label matching
+        console.log('Applied labels:', appliedLabels);
+        console.log('Allowed labels:', allowedLabels);
+        
+        // Verify all applied labels match allowed labels (case insensitive)
+        const allLabelsValid = appliedLabels.every(appliedLabel =>
+          !allowedLabels.length || // Empty allowed = legacy mode
+          allowedLabels.some(allowedLabel =>
+            allowedLabel.toLowerCase() === appliedLabel.toLowerCase()
+          )
+        );
+        
+        assert.ok(allLabelsValid, 'All applied labels should match allowed labels (case insensitive)');
       } else {
         // If labels were skipped because they already existed, that's also a success
         assert.strictEqual(result.action, 'skipped_already_labeled', 

@@ -84,17 +84,53 @@ function getApiConfig() {
  * @returns {Object} - Label configuration object with default allowed labels if not configured
  */
 function getLabelConfig() {
-  const labelConfig = config.labels;
+  // Support both normal runtime and test mode
+  const configToUse = this && this.config ? this.config : config;
+  const labelConfig = configToUse.labels ? { ...configToUse.labels } : null;
+  
+  // Check for legacy mode - if legacy.emptyConfigMeansAllowAll is true
+  const isLegacyMode = configToUse.legacy && configToUse.legacy.emptyConfigMeansAllowAll === true;
+  
+  // Missing label config case
   if (!labelConfig) {
-    console.warn('Warning: Label configuration is missing in config.js. Only using urgent and important labels.');
-    return { allowedLabels: ['urgent', 'important'] };
+    if (isLegacyMode) {
+      console.warn('Warning: Label configuration is missing in config.js. Using legacy mode: all labels allowed.');
+      return { allowedLabels: [], isLegacyMode: true };
+    } else {
+      console.warn('Warning: Label configuration is missing in config.js. Only using urgent and important labels.');
+      return { allowedLabels: ['urgent', 'important'] };
+    }
   }
   
-  // Make sure we always have an allowedLabels array, defaulting to urgent and important
-  if (!labelConfig.allowedLabels || !Array.isArray(labelConfig.allowedLabels) || labelConfig.allowedLabels.length === 0) {
-    console.warn('Warning: allowedLabels is not properly defined in config.js. Only using urgent and important labels.');
+  // Make sure we always have an allowedLabels array
+  if (!labelConfig.allowedLabels || !Array.isArray(labelConfig.allowedLabels)) {
+    if (isLegacyMode) {
+      console.warn('Warning: allowedLabels is not properly defined in config.js. Using legacy mode: all labels allowed.');
+      labelConfig.allowedLabels = [];
+      labelConfig.isLegacyMode = true;
+    } else {
+      console.warn('Warning: allowedLabels is not properly defined in config.js. Only using urgent and important labels.');
+      labelConfig.allowedLabels = ['urgent', 'important'];
+    }
+  } else if (labelConfig.allowedLabels.length === 0 && !isLegacyMode) {
+    // Empty array provided but not in legacy mode
+    console.warn('Warning: Empty allowedLabels array in config.js. Only using urgent and important labels.');
     labelConfig.allowedLabels = ['urgent', 'important'];
   }
+  
+  // Check for legacy mode in the config or an empty array with legacy mode
+  if (isLegacyMode) {
+    labelConfig.isLegacyMode = true;
+    // In legacy mode, we use an empty array (allow all labels)
+    labelConfig.allowedLabels = [];
+    return labelConfig;
+  }
+  
+  // Normalize all allowed labels to lowercase for case-insensitive matching
+  // Also filter out non-string values for type safety
+  labelConfig.allowedLabels = labelConfig.allowedLabels
+    .filter(label => typeof label === 'string') // Only keep string values
+    .map(label => label.toLowerCase()); // Convert to lowercase
   
   return labelConfig;
 }
@@ -149,6 +185,20 @@ function switchEnvironment(environmentName) {
   delete require.cache[require.resolve('../config')];
   
   return config;
+}
+
+// Export just for testing - NOT FOR PRODUCTION
+if (process.env.NODE_ENV === 'test_debug') {
+  const debugConfig = {
+    labels: { allowedLabels: ['URGENT', 'Important', 'critical'] },
+    legacy: { emptyConfigMeansAllowAll: false }
+  };
+  console.log('Debug label config:', getLabelConfig.call({ config: debugConfig }));
+  
+  const legacyConfig = {
+    legacy: { emptyConfigMeansAllowAll: true }
+  };
+  console.log('Legacy label config:', getLabelConfig.call({ config: legacyConfig }));
 }
 
 module.exports = {

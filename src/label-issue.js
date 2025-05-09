@@ -82,18 +82,41 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     const { urgency, importance } = modelResult;
     console.log(`Model result for issue #${issue.number}: urgency=${urgency || 'none'}, importance=${importance || 'none'}`);
 
-    // Create and apply ONLY allowed labels
+    // Check if we're in legacy mode (empty config means allow all labels)
+    const isLegacyMode = labelConfig.isLegacyMode || false;
+    
+    // Create and apply labels based on config mode
     const labels = [];
-    if (urgency && allowedLabels.includes(urgency.toLowerCase())) {
-      labels.push(urgency.toLowerCase());
-    }
-    if (importance && allowedLabels.includes(importance.toLowerCase())) {
-      labels.push(importance.toLowerCase());
+    
+    // In legacy mode, we apply any non-null label returned by the model
+    if (isLegacyMode) {
+      // Ensure urgency is a string before using toLowerCase
+      if (urgency !== null && urgency !== undefined) {
+        const urgencyStr = String(urgency).toLowerCase();
+        labels.push(urgencyStr);
+      }
+      
+      // Ensure importance is a string before using toLowerCase
+      if (importance !== null && importance !== undefined) {
+        const importanceStr = String(importance).toLowerCase();
+        labels.push(importanceStr);
+      }
+      console.log(`Legacy mode: using all model labels for issue #${issue.number}`);
+    } 
+    // In standard mode, we only apply labels from the allowed list
+    else {
+      if (urgency && typeof urgency === 'string' && allowedLabels.includes(urgency.toLowerCase())) {
+        labels.push(urgency.toLowerCase());
+      }
+      if (importance && typeof importance === 'string' && allowedLabels.includes(importance.toLowerCase())) {
+        labels.push(importance.toLowerCase());
+      }
     }
 
     console.log(`Filtered labels for issue #${issue.number}: ${labels.join(', ') || 'none'}`);
-
-    if (labels.length === 0) {
+    
+    // Skip if no labels to apply (but not in legacy mode - which would use all labels)
+    if (labels.length === 0 && !isLegacyMode) {
       console.log(`No allowed labels determined for issue #${issue.number}. Skipping.`);
       return { 
         issue: issue.number, 
