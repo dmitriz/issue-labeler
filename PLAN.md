@@ -41,6 +41,7 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
    - Move test logic to a new mock-based test file.
    - Add mock response using a tool like `nock`.
    - Example:
+
      ```javascript
      const nock = require('nock');
      
