@@ -68,3 +68,4 @@ Refactor integration tests to improve clarity, isolate rate-limited APIs, and en
 
 - Consider a `TEST_API_MODE=record` mode to auto-capture real responses and store them for later use.
 - Useful if mocking is too costly or if coverage is hard to write manually.
+- Benefits include reduced manual effort in creating mock data, more realistic test scenarios, improved test coverage, and easier maintenance as API changes can be re-recorded rather than manually updated.
