@@ -1,5 +1,7 @@
 # PLAN.md – Integration Test Refactor Plan
 
+This document outlines the plan for refactoring integration tests for the issue-labeler project. For background information and overall project context, please refer to the project [README.md](./README.md).
+
 ## Goal
 
 Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and enable mocking support.
@@ -8,7 +10,7 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
 
 - Do not remove or alter any existing real API tests.
 - Real API tests must never be included in the default `npm test` run.
-- Avoid introducing new config files unless required.
+- Avoid introducing new config files unless required, use existing config.js instead.
 - Keep environment variable logic isolated to the test runner or setup files.
 - Ensure new tests follow clear naming and placement conventions.
 
@@ -29,7 +31,7 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
    - This isolates all environment branching to one place.
    - Implement default fallback for safety: `const mode = process.env.TEST_API_MODE || 'mock'`
 
-4. **Update test runner config (if needed)**
+4. **Update the test runner config (if needed)**
    - Load appropriate test files depending on the mode.
    - Do not bake `TEST_API_MODE` logic into individual test files.
 
@@ -39,7 +41,7 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
 
 1. **Start with GitHub model API (rate-limited)**
    - Move test logic to a new mock-based test file.
-   - Add mock response using a tool like `nock`.
+   - Add a mock response using a tool like `nock`.
    - Example:
 
      ```javascript
@@ -56,7 +58,7 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
        });
      ```
 
-2. **Keep real API test as-is**
+2. **Keep real API tests as-is**
    - Mark with `.real.js` or place in `test/integration/real/`.
 
 3. **Add new mock test to regular `npm test`**
@@ -98,7 +100,12 @@ Refactor test/integration/ to improve clarity, isolate rate-limited APIs, and en
 
 - Consider a `TEST_API_MODE=record` mode to auto-capture real responses and store them for later use.
 - Useful if mocking is too costly or if coverage is hard to write manually.
-- Benefits include reduced manual effort in creating mock data, more realistic test scenarios, improved test coverage, and easier maintenance as API changes can be re-recorded rather than manually updated.
+- Benefits of record mode:
+  - Reduces manual effort by automatically capturing real API interactions without hand-coding mocks
+  - Improves test coverage with realistic data patterns that might be missed in manual mocks
+  - Eases maintenance as API changes can be re-recorded rather than manually updated
+  - Captures edge cases that might be difficult to anticipate when writing mocks manually
+  - Provides consistent test data across development environments
 - Recommended libraries:
   - nock's recording feature: `nock.recorder.rec()`
   - @pollyjs/core for more advanced recording and replay features
