@@ -92,7 +92,8 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     }
 
     console.log(`Filtered labels for issue #${issue.number}: ${labels.join(', ') || 'none'}`);
-      console.info(`No allowed labels determined for issue #${issue.number}. Skipping.`);
+
+    if (labels.length === 0) {
       console.log(`No allowed labels determined for issue #${issue.number}. Skipping.`);
       return { 
         issue: issue.number, 
