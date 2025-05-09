@@ -53,7 +53,7 @@ module.exports = {
   model: {
     // The model name/identifier to use for issue analysis
     // Format: 'provider/model-name'
-    name: 'openai/gpt-4o',
+    name: 'microsoft/phi-3-mini-4k-instruct',
     
     // Controls randomness: 0 = deterministic, 1 = maximum randomness
     // Lower values produce more consistent/predictable responses
