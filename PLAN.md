@@ -1,9 +1,11 @@
 # PLAN.md – Integration Test Refactor Plan
 
 ## Goal
+
 Refactor integration tests to improve clarity, isolate rate-limited APIs, and enable mocking support.
 
 ## Key Rules
+
 - Do not remove or alter any existing real API tests.
 - Real API tests must never be included in the default `npm test` run.
 - Avoid introducing new config files unless required.
@@ -19,7 +21,7 @@ Refactor integration tests to improve clarity, isolate rate-limited APIs, and en
    - These are safe to run in every CI push or PR.
 
 2. **Define environment variable**
-   - Use `TEST_API_MODE=mock` or `real`
+   - Use `TEST_API_MODE=mock` (for mock-based tests) or `TEST_API_MODE=real` (for real API tests)
    - Avoid booleans; use string-based values for clarity and extensibility.
 
 3. **Create client switcher**
