@@ -57,7 +57,7 @@ The state file stores mode which is either `work` or `break`.
   - If the filtered group is empty, switch back to the group of all issues
   - Next filter the group by the important label
   - If the filtered group is empty, switch back to the group of all issues
-  - From the filtered group, pick the oldest unclosed issue - this is deviating from current implementation (which takes the most recent issue), thus the code and tests need to be updated to conform to this logic
+  - From the filtered group, pick the issue with the oldest update date - this is deviating from current implementation (which takes the most recent issue), thus the code and tests need to be updated to conform to this logic
 - Print:
   - "Break over. Time to work!"
   - "Your next task: [task title] — [link to issue]"

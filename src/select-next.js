@@ -4,7 +4,7 @@ const { getAllOpenIssues, getIssuesWithLabel } = require('./github-api');
  * Select the next issue to work on based on priority rules:
  * 1. Filter by urgent label if available
  * 2. From resulting list, filter by important label if available
- * 3. Pick most recently updated issue from final list
+ * 3. Pick the issue with the oldest update date from final list
  * 4. If no open issues, show appropriate message
  */
 async function selectNext() {
@@ -34,13 +34,13 @@ async function selectNext() {
     issues = importantIssues;
   }
   
-  // Final selection - sort by updated_at (most recent first)
+  // Final selection - sort by updated_at (oldest first)
   const sortedIssues = issues.sort((a, b) => 
-    new Date(b.updated_at) - new Date(a.updated_at)
+    new Date(a.updated_at) - new Date(b.updated_at)
   );
   
   const top = sortedIssues[0];
-  console.log(`\nSelected issue (most recently updated):`);
+  console.log(`\nSelected issue (oldest updated):`);
   console.log(`#${top.number}: ${top.title}`);
   console.log(`URL: ${top.html_url}`);
   console.log(`Last updated: ${new Date(top.updated_at).toLocaleString()}`);
