@@ -20,11 +20,9 @@ describe('Label All Issues E2E', function() {
   // Capture original labels before test
   before(async function() {
     try {
-      // Skip test if we're in CI without a GitHub token and no explicit flag is set
-      if (process.env.CI && !process.env.GITHUB_TOKEN && !process.env.RUN_BATCH_LABEL_TEST) {
-        console.log('Skipping batch label test in CI environment without GitHub token');
-        this.skip();
-        return;
+      // Always run the test with either real or mock data
+      if (process.env.USE_MOCK_RESPONSE === 'true') {
+        console.log('Using mock data for batch label test');
       }
       
       // Get repository info

@@ -79,11 +79,7 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should select the oldest updated issue when no priority labels are present', async function() {
-    // Only skip if explicitly requested or if we're in CI without a token
-    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
-      this.skip();
-      return;
-    }
+    // This test uses mocks, so it should always run
     
     // Setup mocks
     api.getAllOpenIssues = async () => [mockIssues[0], mockIssues[3]]; // Oldest and most recent issues
@@ -110,11 +106,7 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should prioritize urgent issues and select the oldest urgent issue', async function() {
-    // Only skip if explicitly requested or if we're in CI without a token
-    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
-      this.skip();
-      return;
-    }
+    // This test uses mocks, so it should always run
     
     // Setup mocks - include an urgent issue
     api.getAllOpenIssues = async () => [mockIssues[0], mockIssues[2], mockIssues[3]]; // Oldest, urgent, and recent
@@ -151,11 +143,7 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should prioritize important issues when no urgent issues are found', async function() {
-    // Only skip if explicitly requested or if we're in CI without a token
-    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
-      this.skip();
-      return;
-    }
+    // This test uses mocks, so it should always run
     
     // Setup mocks - include an important issue but no urgent issues
     api.getAllOpenIssues = async () => [mockIssues[0], mockIssues[1], mockIssues[3]]; // Oldest, important, and recent

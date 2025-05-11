@@ -27,13 +27,19 @@ jobs:
     - name: Create .secrets directory
       run: mkdir -p .secrets
       
+    # Create GitHub credentials file for tests that directly read from .secrets directory
     - name: Create GitHub credentials file
       run: |
         echo "module.exports = {" > .secrets/github.js
         echo "  token_model: \"${{ secrets.GH_TOKEN }}\"," >> .secrets/github.js
         echo "  token: \"${{ secrets.GH_TOKEN }}\"," >> .secrets/github.js
-        echo "  token_new: \"${{ secrets.GH_TOKEN }}\"" >> .secrets/github.js
         echo "};" >> .secrets/github.js
+    
+    # Set up common environment variables for all test steps
+    - name: Set up global environment variables
+      run: |
+        echo "USE_MOCK_RESPONSE=true" >> $GITHUB_ENV
+        echo "RUN_ALL_TESTS=true" >> $GITHUB_ENV
         
     - name: Run unit tests
       run: npm run test:unit
@@ -47,9 +53,6 @@ jobs:
       run: npm run test:e2e
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        TEST_ISSUE_NUMBER: 7 # Use issue #7 for tests (smaller content)
-        CI: false # This will prevent the CI check from skipping tests
-        USE_MOCK_RESPONSE: true # Use mock response for model calls
         
     - name: Run model tests with mock
       run: npm run test:models:mock

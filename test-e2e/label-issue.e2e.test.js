@@ -20,11 +20,11 @@ describe('Label Issue E2E', function() {
   // Capture original labels before test
   before(async function() {
     try {
-      // Skip test if no issue number specified and we're in CI without GitHub token
-      if (!process.env.TEST_ISSUE_NUMBER && (process.env.CI && !process.env.GITHUB_TOKEN)) {
-        this.skip();
-        return;
-      }
+      // Use a default test issue number for consistent testing
+      const testIssueNum = process.env.TEST_ISSUE_NUMBER || 7;
+      
+      // Update the constant used throughout the test
+      this.TEST_ISSUE_NUMBER = parseInt(testIssueNum);
       
       testIssue = await api.getIssue({ issue_number: TEST_ISSUE_NUMBER });
       console.log(`Using test issue #${TEST_ISSUE_NUMBER}: "${testIssue.title}"`);
