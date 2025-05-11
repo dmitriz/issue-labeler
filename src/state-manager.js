@@ -17,11 +17,21 @@ const DEFAULT_STATE = {
  */
 async function readState() {
   try {
+    // First check if we have a backup in memory from a previous failed write
+    if (global.__stateBackup) {
+      console.log('Using in-memory state backup');
+      return global.__stateBackup;
+    }
+    
     const fileContent = await fs.readFile(STATE_FILE_PATH, 'utf-8');
     return JSON.parse(fileContent);
   } catch (error) {
     // If file doesn't exist or has invalid JSON, create a default state
-    await writeState(DEFAULT_STATE);
+    const writeSucceeded = await writeState(DEFAULT_STATE);
+    if (!writeSucceeded) {
+      console.warn('Could not write default state file, using in-memory state');
+      global.__stateBackup = DEFAULT_STATE;
+    }
     return DEFAULT_STATE;
   }
 }
@@ -29,15 +39,25 @@ async function readState() {
 /**
  * Writes the current state to the state file
  * @param {Object} state The state to write
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} Returns true if write was successful, false otherwise
  */
 async function writeState(state) {
   try {
     await fs.writeFile(STATE_FILE_PATH, JSON.stringify(state, null, 2), 'utf-8');
     console.log(`State updated successfully: ${JSON.stringify(state)}`);
+    return true;
   } catch (error) {
     console.error('Error writing state file:', error.message);
-    throw error;
+    if (error.code === 'ENOENT') {
+      console.warn('Directory does not exist, attempting to create backup in memory');
+      // Store state in memory as fallback
+      global.__stateBackup = state;
+    } else if (error.code === 'EACCES') {
+      console.warn('Permission denied when writing state file');
+    } else {
+      console.warn(`File system error (${error.code}): ${error.message}`);
+    }
+    return false;
   }
 }
 
@@ -51,8 +71,13 @@ async function toggleSessionMode() {
   // Toggle the mode
   state.mode = state.mode === 'work' ? 'break' : 'work';
   
-  // Write the updated state back to the file
-  await writeState(state);
+  // Write the updated state back to the file (continue even if write fails)
+  const writeSucceeded = await writeState(state);
+  if (!writeSucceeded) {
+    console.warn('Failed to persist state change to disk, continuing with in-memory state');
+    // Ensure we have an in-memory backup
+    global.__stateBackup = state;
+  }
   
   return state;
 }
@@ -65,7 +90,15 @@ async function toggleSessionMode() {
 async function updateBreakIndex(index) {
   const state = await readState();
   state.lastBreakIndex = index;
-  await writeState(state);
+  
+  // Write state but continue even if writing fails
+  const writeSucceeded = await writeState(state);
+  if (!writeSucceeded) {
+    console.warn('Failed to persist break index to disk, continuing with in-memory state');
+    // Ensure we have an in-memory backup
+    global.__stateBackup = state;
+  }
+  
   return state;
 }
 
