@@ -20,8 +20,8 @@ describe('Label Issue E2E', function() {
   // Capture original labels before test
   before(async function() {
     try {
-      // Skip test if no issue number specified and we're in CI
-      if (!process.env.TEST_ISSUE_NUMBER && process.env.CI) {
+      // Skip test if no issue number specified and we're in CI without GitHub token
+      if (!process.env.TEST_ISSUE_NUMBER && (process.env.CI && !process.env.GITHUB_TOKEN)) {
         this.skip();
         return;
       }

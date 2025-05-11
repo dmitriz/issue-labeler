@@ -79,8 +79,8 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should select the oldest updated issue when no priority labels are present', async function() {
-    // Skip this test in CI environments
-    if (process.env.CI) {
+    // Only skip if explicitly requested or if we're in CI without a token
+    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
       this.skip();
       return;
     }
@@ -110,8 +110,8 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should prioritize urgent issues and select the oldest urgent issue', async function() {
-    // Skip this test in CI environments
-    if (process.env.CI) {
+    // Only skip if explicitly requested or if we're in CI without a token
+    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
       this.skip();
       return;
     }
@@ -151,8 +151,8 @@ describe('Select Next Issue E2E', function() {
   });
 
   it('should prioritize important issues when no urgent issues are found', async function() {
-    // Skip this test in CI environments
-    if (process.env.CI) {
+    // Only skip if explicitly requested or if we're in CI without a token
+    if (process.env.SKIP_E2E_TESTS || (process.env.CI && !process.env.GITHUB_TOKEN)) {
       this.skip();
       return;
     }
