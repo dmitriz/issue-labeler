@@ -79,11 +79,7 @@ Issues are not marked automatically (you act on them manually for now)
 
 ## 🧘 Break Suggestion Logic
 
-Stored locally in a simple file or embedded in code:
-
-```json
-["Stretch for 2 minutes", "Drink water", "Look away from screen", "Do 10 squats"]
-```
+Stored locally in the break suggestions file:
 
 - Rotated in fixed order (not random) to reduce decision fatigue
 - Index automatically advances with each new break
@@ -94,37 +90,23 @@ Stored locally in a simple file or embedded in code:
 ### Install & Setup
 
 ```bash
-npm install
-```
-
-### Run in production mode
-
-```bash
 npm start
 ```
 
-### Optional test mode
+should pull issues from the issue-hub repo
+
+### Test mode
 
 ```bash
 npm run test-mode
 ```
 
+should have exactly the same behavior as npm start, but pulls issues from the test repo 
+
+<https://github.com/dmitriz/issue-hub-test>
+
 - Uses mock data to simulate GitHub tasks and break logic
 - Helpful for debugging and demo without touching real repo
-
-## 📁 File Structure Overview
-
-```bash
-/
-├── state.json             # Tracks current session state
-├── break-suggestions.json # List of break ideas
-├── src/
-│   ├── index.js           # Main loop controller
-│   ├── github.js          # Task-fetching logic from issues
-│   └── utils.js           # State and logging helpers
-├── package.json
-├── README.md
-```
 
 ## ✅ Final Manual Validation Steps
 
