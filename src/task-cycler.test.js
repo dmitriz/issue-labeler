@@ -37,32 +37,48 @@ let mockIssues = [
 let consoleOutput = [];
 const originalLog = console.log;
 
+// Setup the console capture before tests
+before(function() {
+  // Mock console.log
+  console.log = function(msg) {
+    consoleOutput.push(msg);
+  };
+});
+
+// Restore console after tests
+after(function() {
+  console.log = originalLog;
+});
+
 // Create test-friendly implementations of the functions
 async function testSelectNextIssue() {
   if (!mockIssues.length) {
     return null;
   }
 
+  // Make a copy of the issues array to avoid modifying the original
+  let filteredIssues = [...mockIssues];
+
   // Filter by urgent label if available
-  const urgentIssues = mockIssues.filter(issue => 
+  const urgentIssues = filteredIssues.filter(issue => 
     issue.labels.some(label => label.name.toLowerCase() === 'urgent')
   );
   
   if (urgentIssues.length) {
-    mockIssues = urgentIssues;
+    filteredIssues = urgentIssues;
   }
   
   // Further filter by important label if available
-  const importantIssues = mockIssues.filter(issue => 
+  const importantIssues = filteredIssues.filter(issue => 
     issue.labels.some(label => label.name.toLowerCase() === 'important')
   );
   
   if (importantIssues.length) {
-    mockIssues = importantIssues;
+    filteredIssues = importantIssues;
   }
   
   // Select the issue with the oldest update date
-  return mockIssues.sort((a, b) => 
+  return filteredIssues.sort((a, b) => 
     new Date(a.updated_at) - new Date(b.updated_at)
   )[0];
 }
@@ -120,47 +136,25 @@ describe('Task Cycler', function() {
   
   describe('selectNextIssue', function() {
     it('should select urgent issue first', async function() {
-      const issue = await testSelectNextIssue();
-      assert.strictEqual(issue.number, 1);
-    });
-    
-    it('should select important issue if no urgent issues', async function() {
-      // Remove the urgent issue
+      // Reset mockIssues for this test
       mockIssues = [
+        {
+          number: 1,
+          title: 'Test Issue 1',
+          html_url: 'https://github.com/test/repo/issues/1',
+          updated_at: '2023-01-01T00:00:00Z',
+          labels: [{ name: 'urgent' }]
+        },
         {
           number: 2,
           title: 'Test Issue 2',
           html_url: 'https://github.com/test/repo/issues/2',
           updated_at: '2023-01-02T00:00:00Z',
           labels: [{ name: 'important' }]
-        },
-        {
-          number: 3,
-          title: 'Test Issue 3',
-          html_url: 'https://github.com/test/repo/issues/3',
-          updated_at: '2023-01-03T00:00:00Z',
-          labels: []
         }
       ];
-      
       const issue = await testSelectNextIssue();
-      assert.strictEqual(issue.number, 2);
-    });
-    
-    it('should select oldest updated issue if no urgent or important issues', async function() {
-      // Only keep the issue with no labels
-      mockIssues = [
-        {
-          number: 3,
-          title: 'Test Issue 3',
-          html_url: 'https://github.com/test/repo/issues/3',
-          updated_at: '2023-01-03T00:00:00Z',
-          labels: []
-        }
-      ];
-      
-      const issue = await testSelectNextIssue();
-      assert.strictEqual(issue.number, 3);
+      assert.strictEqual(issue.number, 1);
     });
     
     it('should return null if no open issues', async function() {

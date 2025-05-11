@@ -83,14 +83,24 @@ async function runTaskCycler() {
     // Toggle the session mode
     const updatedState = await toggleSessionMode();
     
+    // Add debug information
+    console.log(`Session mode toggled to: ${updatedState.mode}`);
+    
     // Handle the appropriate session based on the new mode
     if (updatedState.mode === 'work') {
-      await handleBreakSession(); // Coming from break, going to work
+      // Coming from break, going to work
+      console.log('Handling break to work transition...');
+      await handleBreakSession(); 
     } else {
-      await handleWorkSession(); // Coming from work, going to break
+      // Coming from work, going to break
+      console.log('Handling work to break transition...');
+      await handleWorkSession(); 
     }
+    
+    console.log('Task cycler operation complete');
   } catch (error) {
     console.error("Error in task cycler:", error.message);
+    console.error(error.stack);
   }
 }
 

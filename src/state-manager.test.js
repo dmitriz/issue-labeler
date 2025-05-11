@@ -1,12 +1,4 @@
 const assert = require('assert');
-const fs = require('fs').promises;
-const path = require('path');
-
-// Store the original state manager module
-const stateManager = require('./state-manager');
-
-// Override the state file path for testing
-const TEST_STATE_PATH = path.join(__dirname, '..', 'test-session-state.json');
 
 // Create a test-specific version of the state manager functions
 let mockState = { mode: 'break', lastBreakIndex: -1 };

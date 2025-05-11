@@ -32,7 +32,13 @@ async function readState() {
  * @returns {Promise<void>}
  */
 async function writeState(state) {
-  await fs.writeFile(STATE_FILE_PATH, JSON.stringify(state, null, 2), 'utf-8');
+  try {
+    await fs.writeFile(STATE_FILE_PATH, JSON.stringify(state, null, 2), 'utf-8');
+    console.log(`State updated successfully: ${JSON.stringify(state)}`);
+  } catch (error) {
+    console.error('Error writing state file:', error.message);
+    throw error;
+  }
 }
 
 /**
