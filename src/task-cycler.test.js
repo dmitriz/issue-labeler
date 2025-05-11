@@ -84,12 +84,29 @@ async function testSelectNextIssue() {
 }
 
 async function testHandleWorkSession() {
+  // Clear the output array to ensure we have a clean state
+  consoleOutput = [];
+  
   consoleOutput.push("Work session complete. Time for a break!");
   consoleOutput.push(`Try this break activity: ${mockBreakSuggestion}`);
 }
 
 async function testHandleBreakSession() {
+  // Clear the output array to ensure we have a clean state
+  consoleOutput = [];
+  
   consoleOutput.push("Break over. Time to work!");
+  
+  // Reset mockIssues for consistent test results
+  mockIssues = [
+    {
+      number: 1,
+      title: 'Test Issue 1',
+      html_url: 'https://github.com/test/repo/issues/1',
+      updated_at: '2023-01-01T00:00:00Z',
+      labels: [{ name: 'urgent' }]
+    }
+  ];
   
   const issue = await testSelectNextIssue();
   
