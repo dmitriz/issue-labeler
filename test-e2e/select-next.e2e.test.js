@@ -1,6 +1,6 @@
 /**
  * End-to-end test for select-next workflow
- * Tests the issue selection logic with oldest unclosed issue prioritization
+ * Tests the issue selection logic with oldest updated issue prioritization
  */
 const assert = require('assert');
 const api = require('../src/github-api');
@@ -17,10 +17,10 @@ describe('Select Next Issue E2E', function() {
   const mockIssues = [
     {
       number: 101,
-      title: 'Oldest issue',
+      title: 'Oldest updated issue',
       html_url: 'https://github.com/example/repo/issues/101',
       created_at: '2023-01-01T10:00:00Z',
-      updated_at: '2023-06-01T10:00:00Z',
+      updated_at: '2023-05-01T10:00:00Z', // Oldest update date
       labels: []
     },
     {
@@ -36,15 +36,15 @@ describe('Select Next Issue E2E', function() {
       title: 'Urgent issue',
       html_url: 'https://github.com/example/repo/issues/103',
       created_at: '2023-03-01T10:00:00Z',
-      updated_at: '2023-05-01T10:00:00Z',
+      updated_at: '2023-06-01T10:00:00Z',
       labels: [{ name: 'urgent' }]
     },
     {
       number: 104,
-      title: 'Most recently created issue',
+      title: 'Most recently updated issue',
       html_url: 'https://github.com/example/repo/issues/104',
       created_at: '2023-04-01T10:00:00Z',
-      updated_at: '2023-08-01T10:00:00Z',
+      updated_at: '2023-08-01T10:00:00Z', // Most recent update date
       labels: []
     }
   ];
@@ -78,7 +78,7 @@ describe('Select Next Issue E2E', function() {
     this.consoleOutput = [];
   });
 
-  it('should select the oldest issue when no priority labels are present', async function() {
+  it('should select the oldest updated issue when no priority labels are present', async function() {
     // Skip this test in CI environments
     if (process.env.CI) {
       this.skip();
@@ -97,12 +97,12 @@ describe('Select Next Issue E2E', function() {
       // Execute the module
       await require('../src/select-next');
       
-      // Assert the output shows the oldest issue was selected
+      // Assert the output shows the oldest updated issue was selected
       const selectedIssueOutput = this.consoleOutput.join('\n');
-      assert(selectedIssueOutput.includes('Selected issue (oldest unclosed):'), 
-        'Output should indicate selecting the oldest issue');
-      assert(selectedIssueOutput.includes('#101: Oldest issue'), 
-        'Output should show the oldest issue (#101)');
+      assert(selectedIssueOutput.includes('Selected issue (oldest updated):'), 
+        'Output should indicate selecting the oldest updated issue');
+      assert(selectedIssueOutput.includes('#101: Oldest updated issue'), 
+        'Output should show the oldest updated issue (#101)');
     } catch (error) {
       console.error('Test error:', error);
       throw error;
@@ -139,10 +139,10 @@ describe('Select Next Issue E2E', function() {
       // Execute the module
       await require('../src/select-next');
       
-      // Assert the output shows the oldest urgent issue was selected
+      // Assert the output shows the oldest updated urgent issue was selected
       const selectedIssueOutput = this.consoleOutput.join('\n');
-      assert(selectedIssueOutput.includes('Selected issue (oldest unclosed):'), 
-        'Output should indicate selecting the oldest issue');
+      assert(selectedIssueOutput.includes('Selected issue (oldest updated):'), 
+        'Output should indicate selecting the oldest updated issue');
       assert(selectedIssueOutput.includes('#103: Urgent issue'), 
         'Output should show the urgent issue (#103)');
     } catch (error) {
@@ -180,10 +180,10 @@ describe('Select Next Issue E2E', function() {
       // Execute the module
       await require('../src/select-next');
       
-      // Assert the output shows the oldest important issue was selected
+      // Assert the output shows the oldest updated important issue was selected
       const selectedIssueOutput = this.consoleOutput.join('\n');
-      assert(selectedIssueOutput.includes('Selected issue (oldest unclosed):'), 
-        'Output should indicate selecting the oldest issue');
+      assert(selectedIssueOutput.includes('Selected issue (oldest updated):'), 
+        'Output should indicate selecting the oldest updated issue');
       assert(selectedIssueOutput.includes('#102: Important issue'), 
         'Output should show the important issue (#102)');
     } catch (error) {
