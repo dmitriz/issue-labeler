@@ -2,7 +2,7 @@
  * Test script to verify environment configuration system
  */
 const configLoader = require('../src/config-loader');
-const issuesFetcher = require('../src/github-issue-fetcher');
+const githubApi = require('../src/github-api'); // Updated to use the unified GitHub API
 const fs = require('fs');
 const path = require('path');
 
@@ -30,7 +30,7 @@ try {
   console.log(`   Repository info: ${hasRepoInSecrets ? '✓ Present' : '✗ Missing'}`);
   
   // Display actual repository that will be used (may come from secrets)
-  const repoInfo = issuesFetcher.getCurrentRepositoryInfo();
+  const repoInfo = githubApi.getCurrentRepositoryInfo();
   console.log('\n4. REPOSITORY THAT WILL ACTUALLY BE USED');
   console.log(`   Owner: ${repoInfo.owner}`);
   console.log(`   Repo: ${repoInfo.repo}`);
@@ -49,7 +49,7 @@ try {
   console.log(`   ✗ No GitHub secrets found (.secrets/github.js is missing)`);
   
   // Display actual repository that will be used (from environment)
-  const repoInfo = issuesFetcher.getCurrentRepositoryInfo();
+  const repoInfo = githubApi.getCurrentRepositoryInfo();
   console.log('\n4. REPOSITORY THAT WILL ACTUALLY BE USED');
   console.log(`   Owner: ${repoInfo.owner}`);
   console.log(`   Repo: ${repoInfo.repo}`);

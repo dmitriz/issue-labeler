@@ -7,25 +7,24 @@
     "label-issue": "node src/label-issue.js",
     "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
-    "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "mocha \"src/**/*.test.js\"",
-    "test:integration": "mocha \"test-integration/**/*.test.js\"",
-    "test:e2e": "mocha \"test-e2e/**/*.e2e.test.js\"",
-    "test:models": "mocha \"test-models/**/*.test.js\"",
-    "test:models:mock": "USE_MOCK_RESPONSE=true mocha \"test-models/**/*.test.js\"",
-    "test:all": "npm run test && npm run test:e2e && npm run test:models:mock",
-    "toggle-env": "node scripts/toggle-env.js",
-    "env:status": "node scripts/test-config.js",
-    "run:comment-test": "node test-integration/comment.test.js",
-    "run:direct-api-test": "node test-integration/direct-api.test.js",
-    "run:fetch-only-test": "node test-integration/fetch-only.test.js",
-    "run:github-api-test": "node test-integration/github-api-wrapper.test.js",
-    "run:model-test": "node test-models/github-model.test.js",
-    "run:model-test:mock": "USE_MOCK_RESPONSE=true node test-models/github-model.test.js",
-    "run:label-test": "node test-integration/label.test.js",
-    "run:minimal-test": "node test-integration/minimal.test.js",
-    "run:simple-test": "node test-integration/simple-gh-api.test.js",
-    "run:all-integration": "npm run run:comment-test && npm run run:direct-api-test && npm run run:fetch-only-test && npm run run:github-api-test && npm run run:label-test && npm run run:minimal-test && npm run run:simple-test"
+    
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
+    "test:unit": "cross-env NODE_ENV=test mocha \"src/**/*.test.js\"",
+    
+    "test:integration": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha \"test-integration/**/*.test.js\"",
+    "test:integration:real": "cross-env NODE_ENV=test mocha \"test-integration/**/*.test.js\"",
+    
+    "test:e2e": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha \"test-e2e/**/*.e2e.test.js\"",
+    "test:e2e:real": "cross-env NODE_ENV=test mocha \"test-e2e/**/*.e2e.test.js\"",
+    
+    "test:models": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha \"test-models/**/*.test.js\"",
+    "test:models:real": "echo \"⚠️  Warning: This will hit the real GitHub Models API\" && cross-env NODE_ENV=test mocha \"test-models/**/*.test.js\"",
+        
+    "test:dev": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha --watch \"src/**/*.test.js\"",
+    "test:ci": "npm run test:unit && npm run test:integration && npm run test:models",
+    
+    "env:toggle": "node scripts/toggle-env.js",
+    "env:status": "node scripts/test-config.js"
   },
   "repository": {
     "type": "git",
@@ -42,6 +41,7 @@
     "axios": "^1.9.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "mocha": "^10.8.2"
   }
 }

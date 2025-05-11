@@ -20,11 +20,9 @@ describe('Label All Issues E2E', function() {
   // Capture original labels before test
   before(async function() {
     try {
-      // Skip test if we're in CI and no explicit flag is set
-      if (process.env.CI && !process.env.RUN_BATCH_LABEL_TEST) {
-        console.log('Skipping batch label test in CI environment');
-        this.skip();
-        return;
+      // Always run the test with either real or mock data
+      if (process.env.USE_MOCK_RESPONSE === 'true') {
+        console.log('Using mock data for batch label test');
       }
       
       // Get repository info
@@ -141,12 +139,15 @@ describe('Label All Issues E2E', function() {
       assert.strictEqual(result.summary.success + result.summary.failed, result.summary.total,
         'Sum of successes and failures should equal total issues');
       
-      // Either some issues were labeled, some were skipped, or all failed because no allowed labels were found
+      // Either some issues were labeled, some were skipped as already labeled,
+      // some were skipped because no allowed labels determined, or all failed because no allowed labels were found
       assert.ok(
         result.summary.labeled > 0 || 
         result.summary.skipped > 0 || 
-        (result.summary.failed === result.summary.total && result.summary.total > 0),
-        'Should have either labeled new issues, skipped already labeled ones, or failed due to no allowed labels'
+        (result.summary.failed === result.summary.total && result.summary.total > 0) ||
+        // New case: no allowed labels were determined for any issue
+        (result.summary.success === result.summary.total && result.summary.labeled === 0),
+        'Should have either labeled new issues, skipped already labeled ones, skipped due to no allowed labels, or failed due to no allowed labels'
       );
       
       // Verify that labels were applied by checking each test issue
