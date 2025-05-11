@@ -119,8 +119,7 @@ describe('Select Next Issue E2E', function() {
     // Setup mocks - include an urgent issue
     api.getAllOpenIssues = async () => [mockIssues[0], mockIssues[2], mockIssues[3]]; // Oldest, urgent, and recent
     
-    // Original getIssuesWithLabel implementation
-    const originalGetIssuesWithLabel = api.getIssuesWithLabel;
+    // Mock getIssuesWithLabel to return urgent issues when asked for 'urgent'
     
     // Mock getIssuesWithLabel to return urgent issues when asked for 'urgent'
     api.getIssuesWithLabel = (issues, label) => {
