@@ -597,11 +597,14 @@ async function listComments({ owner = defaultOwner, repo = defaultRepo, issue_nu
 
 /**
  * Retrieves all open issues in the current repository.
+ * Implements retry logic with exponential backoff.
  *
  * @returns {Promise<Array>} A promise that resolves to an array of open issue objects.
  */
 async function getAllOpenIssues() {
-  return listIssues({ state: 'open' });
+  return retry(async () => {
+    return await listIssues({ state: 'open' });
+  }, { retries: 2, delay: 1000 });
 }
 
 /**

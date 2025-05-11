@@ -9,6 +9,10 @@ The Task Cycler is a simple command-line tool that helps you alternate between f
    - **Work Mode**: Shows you the next GitHub issue to work on
    - **Break Mode**: Suggests a break activity to refresh your mind
 
+> **⚠️ Important Note:** The Task Cycler is designed to run as a single instance. Running multiple 
+> instances simultaneously may cause state file corruption. Always ensure only one instance 
+> is active at a time.
+
 ## Getting Started
 
 ### Installation
@@ -50,6 +54,24 @@ Each time you run the command, it will:
 1. End the current session (work or break)
 2. Start the opposite session
 3. Show either a GitHub issue (for work) or a break suggestion
+
+### Debugging and Testing
+
+For debugging the task cycler with detailed state information:
+
+```bash
+npm run debug-cycle
+```
+
+This will display the state file contents before and after running the task cycler, helping you troubleshoot any issues.
+
+For running the E2E tests manually:
+
+```bash
+npm run test:task-cycler
+```
+
+This runs through various scenarios to verify the task cycler's functionality.
 
 ### Test Mode
 

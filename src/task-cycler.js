@@ -26,7 +26,10 @@ const breakSuggestions = require('../break-suggestions');
   const BREAK_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
   const isTestMode = process.env.TEST_REPO === 'true';
 
-  // Using break suggestions from the imported module
+  // Use test-specific break suggestions when in test mode
+  const breakSuggestionsModule = isTestMode && fs.existsSync(path.join(__dirname, '../test-e2e/test-break-suggestions.js')) 
+    ? require('../test-e2e/test-break-suggestions') 
+    : require('../break-suggestions');
 
   // Priority configuration for issue selection
   const PRIORITY_RULES = [
@@ -151,14 +154,27 @@ const breakSuggestions = require('../break-suggestions');
     // If lastBreakIndex exists, use that, otherwise use lastBreakActivity
     const currentIndex = state.lastBreakIndex !== undefined ? state.lastBreakIndex : state.lastBreakActivity;
     
+    // Handle empty break suggestions array
+    if (breakSuggestionsModule.length === 0) {
+      console.log("No break suggestions available");
+      state.lastBreakActivity = -1;
+      state.lastBreakIndex = -1;
+      saveState(state);
+      return {
+        mode: 'break',
+        timeRemaining: BREAK_DURATION,
+        suggestion: "No break suggestions available"
+      };
+    }
+    
     // Select next break activity
-    const nextIndex = (currentIndex + 1) % breakSuggestions.length;
+    const nextIndex = (currentIndex + 1) % breakSuggestionsModule.length;
     
     // Update both properties to ensure compatibility
     state.lastBreakActivity = nextIndex;
     state.lastBreakIndex = nextIndex;
     
-    const activity = breakSuggestions[nextIndex];
+    const activity = breakSuggestionsModule[nextIndex];
     
     // Display break suggestion
     console.log(`Try this break activity: ${activity}`);
@@ -183,12 +199,17 @@ const breakSuggestions = require('../break-suggestions');
         return { number: 123, title: 'Test issue', html_url: 'https://github.com/example/repo/issues/123' };
       }
       
-      const issues = await getAllOpenIssues();
-      if (issues && issues.length > 0) {
-        // Simple algorithm: just take the first open issue
-        return issues[0];
+      try {
+        const issues = await getAllOpenIssues();
+        if (issues && issues.length > 0) {
+          // Simple algorithm: just take the first open issue
+          return issues[0];
+        }
+        return null;
+      } catch (githubError) {
+        // Add more specific error context
+        throw new Error(`Failed to fetch GitHub issues: ${githubError.message}`);
       }
-      return null;
     } catch (error) {
       console.error('Error selecting next issue:', error.message);
       return null;

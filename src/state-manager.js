@@ -11,6 +11,32 @@ const DEFAULT_STATE = {
 };
 
 /**
+ * Validates a state object to ensure it has the correct structure
+ * @param {Object} state The state to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+function validateState(state) {
+  if (!state || typeof state !== 'object') {
+    console.error('State must be an object');
+    return false;
+  }
+  
+  // Check mode property
+  if (!state.mode || (state.mode !== 'work' && state.mode !== 'break')) {
+    console.error(`Invalid mode value: ${state.mode}. Mode must be 'work' or 'break'.`);
+    return false;
+  }
+  
+  // Check lastBreakIndex property
+  if (typeof state.lastBreakIndex !== 'number') {
+    console.error(`Invalid lastBreakIndex: ${state.lastBreakIndex}. Must be a number.`);
+    return false;
+  }
+  
+  return true;
+}
+
+/**
  * Reads the current session state from file
  * Creates a default state file if none exists
  * @returns {Promise<Object>} The current state
@@ -24,7 +50,15 @@ async function readState() {
     }
     
     const fileContent = await fs.readFile(STATE_FILE_PATH, 'utf-8');
-    return JSON.parse(fileContent);
+    const parsedState = JSON.parse(fileContent);
+    
+    // Validate the state structure
+    if (!validateState(parsedState)) {
+      console.warn('Invalid state file structure, using default state');
+      return DEFAULT_STATE;
+    }
+    
+    return parsedState;
   } catch (error) {
     // If file doesn't exist or has invalid JSON, create a default state
     const writeSucceeded = await writeState(DEFAULT_STATE);
@@ -109,5 +143,6 @@ module.exports = {
   readState,
   writeState,
   toggleSessionMode,
-  updateBreakIndex
+  updateBreakIndex,
+  validateState
 };

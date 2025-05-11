@@ -8,6 +8,8 @@
     "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
     "cycle": "npm start",
+    "debug-cycle": "node scripts/debug-task-cycler.js",
+    "test:task-cycler": "node scripts/run-task-cycler-tests.js",
     
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
     "test:unit": "cross-env NODE_ENV=test mocha \"src/**/*.test.js\"",

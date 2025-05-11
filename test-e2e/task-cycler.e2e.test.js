@@ -86,11 +86,13 @@ describe('Task Cycler E2E', function() {
   });
   
   it('should cycle through break suggestions', function() {
-    // Skip the test if there aren't enough break suggestions
-    const breakSuggestions = require('../break-suggestions');
+    // Use test-specific break suggestions to ensure consistent test data
+    const breakSuggestions = require('./test-break-suggestions');
+    
+    // Ensure we have enough test suggestions
     if (breakSuggestions.length <= 1) {
-      console.log('Skipping break suggestion test - not enough suggestions available');
-      this.skip();
+      console.log('Not enough test break suggestions available');
+      this.fail('Test break suggestions file must contain at least 2 suggestions');
       return;
     }
     
