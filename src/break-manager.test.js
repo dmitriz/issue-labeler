@@ -1,14 +1,4 @@
-const ass// Test implementation of the function
-async function testGetNextBreakSuggestion() {
-  // Calculate next index with wrap-around
-  let nextIndex = (mockState.lastBreakIndex + 1) % breakSuggestions.length;
-  
-  // Update the mock state
-  mockState.lastBreakIndex = nextIndex;
-  
-  // Return the suggestion
-  return breakSuggestions[nextIndex];
-}re('assert');
+const assert = require('assert');
 const breakSuggestions = require('../break-suggestions');
 
 // We'll manually create a testable version of the getNextBreakSuggestion function
