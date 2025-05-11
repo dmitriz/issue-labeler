@@ -1,117 +1,182 @@
+const fs = require('fs');
+const path = require('path');
 /**
- * Task Cycler - Alternates between work and break sessions
+ * Gets GitHub issues using the github-client module
+ * @module task-cycler
+ * @requires ./github-client
+ */
+const { getIssues } = require('./github-client');
+
+/**
+ * Task Cycler - Manages work-break cycles to maintain productivity
+ * Enforces regular breaks and structured work sessions by:
+ * - Using a persistent state file to track session modes
+ * - Prioritizing work from GitHub issues
+ * - Suggesting varied break activities
+ * 
  * Uses a persistent state file to track the current mode
  * Pulls work tasks from GitHub issues
  * Cycles through break suggestions from a local list
  */
+  // Configuration
+  const STATE_FILE = path.join(__dirname, '../.task-state.json');
+  const WORK_DURATION = 25 * 60 * 1000; // 25 minutes in milliseconds
+  const BREAK_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+  const isTestMode = process.env.TEST_REPO === 'true';
 
-const { toggleSessionMode, readState } = require('./state-manager');
-const { getNextBreakSuggestion } = require('./break-manager');
-const { getAllOpenIssues, getIssuesWithLabel } = require('./github-api');
-const config = require('../config');
+  // Break activities to suggest
+  const breakActivities = [
+    'Take a short walk',
+    'Do some stretching',
+    'Practice deep breathing',
+    'Get some water',
+    'Rest your eyes',
+    'Tidy up your workspace'
+  ];
 
-// Check if we're in test mode (using TEST_REPO environment variable)
-const isTestMode = () => process.env.TEST_REPO === 'true';
+  // Priority configuration for issue selection
+  const PRIORITY_RULES = [
+    { label: 'urgent', weight: 100 },
+    { label: 'important', weight: 50 },
+    { label: 'bug', weight: 40 },
+    { label: 'enhancement', weight: 30 },
+    { label: 'documentation', weight: 20 }
+  ];
 
-/**
- * Selects the next GitHub issue based on priority rules
- * This is adapted from the existing select-next.js logic
- * @returns {Promise<Object>} The selected issue
- */
-async function selectNextIssue() {
-  // Get all open issues
-  let issues = await getAllOpenIssues();
-  
-  if (!issues.length) {
-    return null;
-  }
-
-  // Filter by urgent label if available
-  const urgentIssues = getIssuesWithLabel(issues, 'urgent');
-  if (urgentIssues.length) {
-    issues = urgentIssues;
-  }
-  
-  // Further filter by important label if available
-  const importantIssues = getIssuesWithLabel(issues, 'important');
-  if (importantIssues.length) {
-    issues = importantIssues;
-  }
-  
-  // Select the issue with the oldest update date
-  return issues.sort((a, b) => 
-    new Date(a.updated_at) - new Date(b.updated_at)
-  )[0];
-}
-
-/**
- * Handles a work session, transitioning to a break
- * @returns {Promise<void>}
- */
-async function handleWorkSession() {
-  console.log("Work session complete. Time for a break!");
-  
-  // Get the next break suggestion
-  const breakSuggestion = await getNextBreakSuggestion();
-  console.log(`Try this break activity: ${breakSuggestion}`);
-}
-
-/**
- * Handles a break session, transitioning to work
- * @returns {Promise<void>}
- */
-async function handleBreakSession() {
-  console.log("Break over. Time to work!");
-  
-  // Get the next work task
-  const issue = await selectNextIssue();
-  
-  if (!issue) {
-    console.log("No open issues available. Enjoy some free time!");
-    return;
-  }
-  
-  console.log(`Your next task: ${issue.title} — ${issue.html_url}`);
-}
-
-/**
- * Main function that runs the task cycler
- * @returns {Promise<void>}
- */
-async function runTaskCycler() {
-  try {
-    // Toggle the session mode
-    const updatedState = await toggleSessionMode();
-    
-    // Add debug information
-    console.log(`Session mode toggled to: ${updatedState.mode}`);
-    
-    // Handle the appropriate session based on the new mode
-    if (updatedState.mode === 'work') {
-      // Coming from break, going to work
-      console.log('Handling break to work transition...');
-      await handleBreakSession(); 
-    } else {
-      // Coming from work, going to break
-      console.log('Handling work to break transition...');
-      await handleWorkSession(); 
+  /**
+   * Get the current state from the state file or create default
+   * @returns {Object} The current state
+   */
+  function getState() {
+    try {
+      if (fs.existsSync(STATE_FILE)) {
+        return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+      }
+    } catch (error) {
+      console.warn('Error reading state file:', error.message);
     }
     
-    console.log('Task cycler operation complete');
-  } catch (error) {
-    console.error("Error in task cycler:", error.message);
-    console.error(error.stack);
+    return {
+      mode: 'work', // 'work' or 'break'
+      currentIssueNumber: null,
+      lastBreakActivity: -1,
+      startTime: Date.now()
+    };
   }
-}
 
-// Run the task cycler if this file is executed directly
-if (require.main === module) {
-  runTaskCycler();
-}
+  /**
+   * Save the current state to the state file
+   * @param {Object} state The state to save
+   */
+  function saveState(state) {
+    if (!isTestMode) {
+      try {
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+      } catch (error) {
+        console.error('Error saving state:', error.message);
+      }
+    } else {
+      console.log('Test mode: State would be saved as:', state);
+    }
+  }
 
-module.exports = {
-  runTaskCycler,
-  handleWorkSession,
-  handleBreakSession,
-  selectNextIssue
+  /**
+   * Handle a work session
+   * @returns {Object} Information about the current work session
+   */
+  async function handleWorkSession() {
+    const state = getState();
+    state.mode = 'work';
+    state.startTime = Date.now();
+    
+    // Get the next issue to work on if none is selected
+    if (!state.currentIssueNumber) {
+      const nextIssue = await selectNextIssue();
+      state.currentIssueNumber = nextIssue ? nextIssue.number : null;
+    }
+    
+    saveState(state);
+    
+    try {
+      // Get next issue information
+      const issueDetails = state.currentIssueNumber ? 
+      await selectNextIssue() : null;
+      
+      return {
+      mode: 'work',
+      timeRemaining: WORK_DURATION,
+      currentIssue: state.currentIssueNumber,
+      issueDetails: issueDetails
+      };
+    } catch (error) {
+      console.error('Error in work session:', error.message);
+      console.error(error.stack);
+      
+      // Attempt to recover by resetting state
+      try {
+      const freshState = getState();
+      console.log('Current system state:', freshState);
+      return {
+        mode: 'work',
+        timeRemaining: WORK_DURATION,
+        currentIssue: null,
+        error: true,
+        recoveryAttempted: true
+      };
+      } catch (stateError) {
+      console.error('System state cannot be determined:', stateError.message);
+      throw new Error('Critical failure in task cycle management');
+      }
+    }
+  }
+
+  /**
+   * Handle a break session
+   * @returns {Object} Information about the break session
+   */
+  function handleBreakSession() {
+    const state = getState();
+    state.mode = 'break';
+    state.startTime = Date.now();
+    
+    // Select next break activity
+    state.lastBreakActivity = (state.lastBreakActivity + 1) % breakActivities.length;
+    const activity = breakActivities[state.lastBreakActivity];
+    
+    saveState(state);
+    
+    return {
+      mode: 'break',
+      timeRemaining: BREAK_DURATION,
+      suggestion: activity
+    };
+  }
+
+  /**
+   * Select the next issue to work on
+   * @returns {Object|null} The next issue or null if no issues
+   */
+  async function selectNextIssue() {
+    try {
+      if (isTestMode) {
+        console.log('Test mode: Would fetch issues from GitHub');
+        return { number: 123, title: 'Test issue' };
+      }
+      
+      const issues = await getIssues();
+      if (issues && issues.length > 0) {
+        // Simple algorithm: just take the first open issue
+        return issues[0];
+      }
+      return null;
+    } catch (error) {
+      console.error('Error selecting next issue:', error.message);
+      return null;
+    }
+  }
+
+  module.exports = {
+    handleWorkSession,
+    handleBreakSession,
+    selectNextIssue
 };

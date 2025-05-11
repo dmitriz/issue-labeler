@@ -10,7 +10,15 @@ async function getNextBreakSuggestion() {
   const state = await readState();
   
   // Calculate the next index (with wrap-around)
-  let nextIndex = (state.lastBreakIndex + 1) % breakSuggestions.length;
+  // Ensure we have a valid index to start with
+  const currentIndex = typeof state.lastBreakIndex === 'number' ? state.lastBreakIndex : -1;
+  
+  // Handle empty break suggestions array
+  if (breakSuggestions.length === 0) {
+    return "No break suggestions available";
+  }
+  
+  let nextIndex = (currentIndex + 1) % breakSuggestions.length;
   
   // Update the state with the new index
   await updateBreakIndex(nextIndex);

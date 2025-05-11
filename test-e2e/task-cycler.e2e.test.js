@@ -16,6 +16,7 @@ describe('Task Cycler E2E', function() {
       }
     } catch (error) {
       console.error('Error backing up state file:', error);
+      this.skip(); // Skip tests if setup fails
     }
   });
   

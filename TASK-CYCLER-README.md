@@ -25,6 +25,18 @@ npm install
 
 The task cycler uses the `config.js` file to determine which GitHub repository to pull issues from. Make sure you have configured your GitHub repository correctly.
 
+1. Open `config.js` in your editor
+2. Update the repository owner and name:
+
+```js
+module.exports = {
+   github: {
+      owner: 'your-organization',
+      repo: 'your-repository',
+   }
+};
+```
+
 ### Using the Task Cycler
 
 Run the task cycler:
@@ -34,6 +46,7 @@ npm start
 ```
 
 Each time you run the command, it will:
+
 1. End the current session (work or break)
 2. Start the opposite session
 3. Show either a GitHub issue (for work) or a break suggestion

@@ -35,18 +35,21 @@ let mockIssues = [
 
 // Capture console output for testing
 let consoleOutput = [];
+// Store the original console.log function
 const originalLog = console.log;
 
-// Setup the console capture before tests
-before(function() {
+// Setup the console capture before each test
+beforeEach(function() {
+  // Reset the console output array
+  consoleOutput = [];
   // Mock console.log
   console.log = function(msg) {
     consoleOutput.push(msg);
   };
 });
 
-// Restore console after tests
-after(function() {
+// Restore console after each test
+afterEach(function() {
   console.log = originalLog;
 });
 
@@ -200,7 +203,7 @@ describe('Task Cycler', function() {
       await testHandleBreakSession();
       
       // Debug logs to help understand what's happening
-      console.error('Debug - consoleOutput:', consoleOutput);
+      assert(consoleOutput[1]?.includes('Your next task:'));
       
       assert.strictEqual(consoleOutput[0], 'Break over. Time to work!');
       assert(consoleOutput[1] && consoleOutput[1].includes('Your next task:'));
