@@ -97,16 +97,8 @@ async function testHandleBreakSession() {
   
   consoleOutput.push("Break over. Time to work!");
   
-  // Reset mockIssues for consistent test results
-  mockIssues = [
-    {
-      number: 1,
-      title: 'Test Issue 1',
-      html_url: 'https://github.com/test/repo/issues/1',
-      updated_at: '2023-01-01T00:00:00Z',
-      labels: [{ name: 'urgent' }]
-    }
-  ];
+  // Don't reset mockIssues here - let the test control it
+  // This allows tests to set mockIssues = [] to test the no issues case
   
   const issue = await testSelectNextIssue();
   
@@ -191,16 +183,46 @@ describe('Task Cycler', function() {
   
   describe('handleBreakSession', function() {
     it('should print break completion and next task', async function() {
+      // Make sure mockIssues has at least one issue
+      mockIssues = [
+        {
+          number: 1,
+          title: 'Test Issue 1',
+          html_url: 'https://github.com/test/repo/issues/1',
+          updated_at: '2023-01-01T00:00:00Z',
+          labels: [{ name: 'urgent' }]
+        }
+      ];
+      
+      // Clear the output array to ensure we have a clean state
+      consoleOutput = [];
+      
       await testHandleBreakSession();
+      
+      // Debug logs to help understand what's happening
+      console.error('Debug - consoleOutput:', consoleOutput);
+      
       assert.strictEqual(consoleOutput[0], 'Break over. Time to work!');
-      assert(consoleOutput[1].includes('Your next task:'));
+      assert(consoleOutput[1] && consoleOutput[1].includes('Your next task:'));
     });
     
     it('should handle case with no issues', async function() {
+      // Save the original mockIssues
+      const originalMockIssues = [...mockIssues];
+      
+      // Set mockIssues to empty array to simulate no issues
       mockIssues = [];
+      
+      // Clear the output array to ensure we have a clean state
+      consoleOutput = [];
+      
       await testHandleBreakSession();
-      assert.strictEqual(consoleOutput[0], 'Break over. Time to work!');
-      assert.strictEqual(consoleOutput[1], 'No open issues available. Enjoy some free time!');
+      
+      // Restore mockIssues
+      mockIssues = originalMockIssues;
+      
+      assert.strictEqual(consoleOutput[0], "Break over. Time to work!");
+      assert.strictEqual(consoleOutput[1], "No open issues available. Enjoy some free time!");
     });
   });
   
