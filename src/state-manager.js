@@ -35,7 +35,6 @@ async function readState() {
     return DEFAULT_STATE;
   }
 }
-
 /**
  * Writes the current state to the state file
  * @param {Object} state The state to write
@@ -88,6 +87,10 @@ async function toggleSessionMode() {
  * @returns {Promise<Object>} The updated state
  */
 async function updateBreakIndex(index) {
+  if (typeof index !== 'number' || index < -1) {
+    throw new Error('Invalid break index value');
+  }
+  
   const state = await readState();
   state.lastBreakIndex = index;
   

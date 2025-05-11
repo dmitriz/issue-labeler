@@ -85,18 +85,37 @@ describe('Task Cycler E2E', function() {
   });
   
   it('should cycle through break suggestions', function() {
-    // Create a state file in work mode with lastBreakIndex 0
-    fs.writeFileSync(STATE_FILE_PATH, JSON.stringify({ mode: 'work', lastBreakIndex: 0 }));
+    // Skip the test if there aren't enough break suggestions
+    const breakSuggestions = require('../break-suggestions');
+    if (breakSuggestions.length <= 1) {
+      console.log('Skipping break suggestion test - not enough suggestions available');
+      this.skip();
+      return;
+    }
     
-    // Run the task cycler once
+    // Get the total number of break suggestions
+    const totalSuggestions = breakSuggestions.length;
+    
+    // Create a state file in work mode with lastBreakIndex at the end
+    // This ensures we'll wrap around to the first suggestion
+    fs.writeFileSync(STATE_FILE_PATH, JSON.stringify({ 
+      mode: 'work', 
+      lastBreakIndex: totalSuggestions - 1 
+    }));
+    
+    // Run the task cycler once - this should get the first suggestion after wraparound
     const output1 = execSync('npm run test-mode', { encoding: 'utf8' });
     assert(output1.includes('Try this break activity:'), 'Should show a break suggestion');
     
     // Get the first break suggestion
     const breakSuggestion1 = output1.split('Try this break activity: ')[1].split('\n')[0];
     
-    // Set back to work mode
-    fs.writeFileSync(STATE_FILE_PATH, JSON.stringify({ mode: 'work', lastBreakIndex: 1 }));
+    // Verify we got the expected suggestion from the array
+    assert.strictEqual(breakSuggestion1, breakSuggestions[0], 
+      'Should show the first break suggestion after wrapping around');
+    
+    // Set back to work mode and use the first index
+    fs.writeFileSync(STATE_FILE_PATH, JSON.stringify({ mode: 'work', lastBreakIndex: 0 }));
     
     // Run again
     const output2 = execSync('npm run test-mode', { encoding: 'utf8' });
@@ -104,6 +123,12 @@ describe('Task Cycler E2E', function() {
     // Get the second break suggestion
     const breakSuggestion2 = output2.split('Try this break activity: ')[1].split('\n')[0];
     
-    assert.notStrictEqual(breakSuggestion1, breakSuggestion2, 'Should show different break suggestions');
+    // Verify we got the expected second suggestion
+    assert.strictEqual(breakSuggestion2, breakSuggestions[1],
+      'Should show the second break suggestion');
+    
+    // Verify the suggestions are different
+    assert.notStrictEqual(breakSuggestion1, breakSuggestion2, 
+      'Should show different break suggestions');
   });
 });
