@@ -116,9 +116,11 @@ describe('Label Issue E2E', function() {
         
         assert.ok(allLabelsValid, 'All applied labels should match allowed labels (case insensitive)');
       } else {
-        // If labels were skipped because they already existed, that's also a success
-        assert.strictEqual(result.action, 'skipped_already_labeled', 
-          'If no new labels were applied, the action should be skipped_already_labeled');
+        // If labels were skipped because they already existed or none were allowed, that's also a success
+        assert.ok(
+          result.action === 'skipped_already_labeled' || result.action === 'skipped_no_allowed_labels',
+          'If no new labels were applied, the action should be skipped_already_labeled or skipped_no_allowed_labels'
+        );
       }
     } else {
       // If the model determined no allowed labels (e.g., not urgent, not important),

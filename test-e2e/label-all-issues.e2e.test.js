@@ -20,9 +20,9 @@ describe('Label All Issues E2E', function() {
   // Capture original labels before test
   before(async function() {
     try {
-      // Skip test if we're in CI and no explicit flag is set
-      if (process.env.CI && !process.env.RUN_BATCH_LABEL_TEST) {
-        console.log('Skipping batch label test in CI environment');
+      // Skip test if we're in CI without a GitHub token and no explicit flag is set
+      if (process.env.CI && !process.env.GITHUB_TOKEN && !process.env.RUN_BATCH_LABEL_TEST) {
+        console.log('Skipping batch label test in CI environment without GitHub token');
         this.skip();
         return;
       }
