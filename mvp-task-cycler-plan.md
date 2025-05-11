@@ -2,7 +2,11 @@
 
 ## 📌 Purpose
 
-The purpose of this MVP is to build a minimal but functional task cycler that alternates between focused work sessions and short breaks. It automatically fetches tasks from a real GitHub repository and rotates through a predefined list of break suggestions.
+The purpose of this MVP is to build a minimal but functional task cycler that alternates between focused work sessions and short breaks. It should automatically fetch tasks as issues from 
+
+<https://github.com/dmitriz/issue-hub>
+
+and rotate through a predefined list of break suggestions.
 
 ## 🧱 Core Features
 
@@ -13,7 +17,7 @@ Each run of the script:
 - Ends the current session (work or break)
 - Starts the opposite session
 - Prints a new task or break suggestion
-- Uses a persistent state file (e.g. state.json) to track the current mode and last suggestion used
+- Uses a persistent state file to track the current mode and last suggestion used
 
 Works with:
 
@@ -25,24 +29,13 @@ Works with:
 There are only two valid states for the app at any time:
 
 - `work`: You're currently focused on a task
-- `break`: You're currently in a rest mode
+- `break`: You're currently in a break mode
 
 Each session alternates with the other when the script is run.
 
 ## 🧠 State Structure
 
-The state file stores:
-
-```json
-{
-  "mode": "work" | "break"
-}
-```
-
-Optional internal (invisible) metadata:
-
-- Last used break suggestion index (for cycling)
-- Last used task ID (optional; we typically fetch the next automatically)
+The state file stores mode which is either `work` or `break`.
 
 ## 🔄 Session Loop Logic (High-Level)
 
@@ -60,12 +53,15 @@ Optional internal (invisible) metadata:
 - End the break
 - Start a new work session
 - Fetch the next task from GitHub issues, using the following logic:
-  - First, look for issues marked as urgent (label urgent) and assigned to the user
-  - If none, check for important tasks (label important)
-  - Otherwise, fall back to the oldest available task
+  - First, filter issues by the urgent label
+  - If the filtered group is empty, switch back to the group of all issues
+  - Next filter the group by the important label
+  - If the filtered group is empty, switch back to the group of all issues
+  - From the filtered group, pick the oldest unclosed issue - this is deviating from current implementation (which takes the most recent issue), thus the code and tests need to be updated to conform to this logic
 - Print:
   - "Break over. Time to work!"
   - "Your next task: [task title] — [link to issue]"
+  - URL to the issue
 
 ## 🔗 GitHub Task Logic
 
