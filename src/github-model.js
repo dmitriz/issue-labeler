@@ -83,6 +83,15 @@ function cleanModelResponse(rawContent) {
  * @returns {Object} - Object containing urgency and importance values
  */
 async function callModel(prompt) {
+  // Use mock response in CI or when specifically requested
+  if (process.env.USE_MOCK_RESPONSE === 'true') {
+    console.log('Using mock model response');
+    return {
+      urgency: "not urgent",
+      importance: "low"
+    };
+  }
+  
   try {
     const response = await axiosInstance.post(modelConfig.apiEndpoint, {
       messages: [

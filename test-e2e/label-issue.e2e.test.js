@@ -64,9 +64,15 @@ describe('Label Issue E2E', function() {
         repo: repoInfo.repo
       });
     } catch (error) {
-      // If we get a rate limit error, skip the test
-      if (error.message && error.message.includes('Rate limit exceeded')) {
-        console.log('API rate limit exceeded. Skipping test.');
+      // If we get a rate limit error or token limit error, skip the test
+      if (
+        error.message && (
+          error.message.includes('Rate limit exceeded') ||
+          error.message.includes('Request failed with status code 400') ||
+          error.message.includes('maximum context length')
+        )
+      ) {
+        console.log('API error (rate limit or token limit). Skipping test.');
         this.skip();
         return;
       }

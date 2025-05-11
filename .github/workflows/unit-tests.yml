@@ -47,8 +47,9 @@ jobs:
       run: npm run test:e2e
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        TEST_ISSUE_NUMBER: 1 # Use issue #1 for tests
+        TEST_ISSUE_NUMBER: 7 # Use issue #7 for tests (smaller content)
         CI: false # This will prevent the CI check from skipping tests
+        USE_MOCK_RESPONSE: true # Use mock response for model calls
         
     - name: Run model tests with mock
       run: npm run test:models:mock

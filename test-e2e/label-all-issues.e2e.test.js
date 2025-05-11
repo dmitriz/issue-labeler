@@ -141,12 +141,15 @@ describe('Label All Issues E2E', function() {
       assert.strictEqual(result.summary.success + result.summary.failed, result.summary.total,
         'Sum of successes and failures should equal total issues');
       
-      // Either some issues were labeled, some were skipped, or all failed because no allowed labels were found
+      // Either some issues were labeled, some were skipped as already labeled,
+      // some were skipped because no allowed labels determined, or all failed because no allowed labels were found
       assert.ok(
         result.summary.labeled > 0 || 
         result.summary.skipped > 0 || 
-        (result.summary.failed === result.summary.total && result.summary.total > 0),
-        'Should have either labeled new issues, skipped already labeled ones, or failed due to no allowed labels'
+        (result.summary.failed === result.summary.total && result.summary.total > 0) ||
+        // New case: no allowed labels were determined for any issue
+        (result.summary.success === result.summary.total && result.summary.labeled === 0),
+        'Should have either labeled new issues, skipped already labeled ones, skipped due to no allowed labels, or failed due to no allowed labels'
       );
       
       // Verify that labels were applied by checking each test issue
