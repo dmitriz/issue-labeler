@@ -34,13 +34,16 @@ async function getPromptTemplate() {
 }
 
 /**
- * Process a single issue for labeling
- * @param {Object} issue - Complete issue object from GitHub API 
- * @param {Object} options - Options object
- * @param {string} options.owner - Repository owner
- * @param {string} options.repo - Repository name
- * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template
- * @returns {Promise<Object>} - Result of processing
+ * Analyzes a GitHub issue using an AI model and applies allowed urgency and importance labels.
+ *
+ * If the AI model suggests labels not in the allowed set, the issue is skipped without error. If all suggested labels are already present, no changes are made. Handles rate limit errors by returning retry information.
+ *
+ * @param {Object} issue - The GitHub issue object to process.
+ * @param {Object} options - Options for processing.
+ * @param {string} options.owner - Repository owner.
+ * @param {string} options.repo - Repository name.
+ * @param {string} [options.promptTemplate] - Optional pre-loaded prompt template.
+ * @returns {Promise<Object>} Result object indicating success, applied labels, or reason for skipping or failure.
  */
 async function processIssue(issue, { owner, repo, promptTemplate }) {
   console.log(`Processing issue #${issue.number}: "${issue.title}"`);
@@ -51,6 +54,8 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     const configLoader = require('./config-loader');
     const labelConfig = configLoader.getLabelConfig();
     const allowedLabels = labelConfig.allowedLabels || [];
+    
+    console.log(`Using allowed labels: ${allowedLabels.join(', ')}`);
     
     // Prepare the prompt by replacing the placeholders with actual issue content
     const prompt = template
@@ -78,22 +83,50 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     }
     
     const { urgency, importance } = modelResult;
-    console.log(`Model result for issue #${issue.number}: urgency=${urgency}, importance=${importance}`);
+    console.log(`Model result for issue #${issue.number}: urgency=${urgency || 'none'}, importance=${importance || 'none'}`);
 
-    // Create and apply ONLY allowed labels
+    // Check if we're in legacy mode (empty config means allow all labels)
+    const isLegacyMode = labelConfig.isLegacyMode || false;
+    
+    // Create and apply labels based on config mode
     const labels = [];
-    if (urgency && allowedLabels.includes(urgency.toLowerCase())) {
-      labels.push(urgency);
-    }
-    if (importance && allowedLabels.includes(importance.toLowerCase())) {
-      labels.push(importance);
+    
+    // In legacy mode, we apply any non-null label returned by the model
+    if (isLegacyMode) {
+      // Ensure urgency is a string before using toLowerCase
+      if (urgency !== null && urgency !== undefined) {
+        const urgencyStr = String(urgency).toLowerCase();
+        labels.push(urgencyStr);
+      }
+      
+      // Ensure importance is a string before using toLowerCase
+      if (importance !== null && importance !== undefined) {
+        const importanceStr = String(importance).toLowerCase();
+        labels.push(importanceStr);
+      }
+      console.log(`Legacy mode: using all model labels for issue #${issue.number}`);
+    } 
+    // In standard mode, we only apply labels from the allowed list
+    else {
+      if (urgency && typeof urgency === 'string' && allowedLabels.includes(urgency.toLowerCase())) {
+        labels.push(urgency.toLowerCase());
+      }
+      if (importance && typeof importance === 'string' && allowedLabels.includes(importance.toLowerCase())) {
+        labels.push(importance.toLowerCase());
+      }
     }
 
     console.log(`Filtered labels for issue #${issue.number}: ${labels.join(', ') || 'none'}`);
-
-    if (labels.length === 0) {
-      console.warn(`No allowed labels determined for issue #${issue.number}.`);
-      return { issue: issue.number, success: false, reason: 'no_allowed_labels_determined' };
+    
+    // Skip if no labels to apply (but not in legacy mode - which would use all labels)
+    if (labels.length === 0 && !isLegacyMode) {
+      console.log(`No allowed labels determined for issue #${issue.number}. Skipping.`);
+      return { 
+        issue: issue.number, 
+        success: true, // Mark as success to prevent errors in batch processing
+        reason: 'no_allowed_labels_determined',
+        action: 'skipped_no_allowed_labels'
+      };
     }
 
     // Check if the issue already has these labels to avoid unnecessary API calls

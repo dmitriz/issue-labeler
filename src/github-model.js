@@ -106,10 +106,32 @@ async function callModel(prompt) {
     const rawContent = response.data.choices[0].message.content.trim();
     const parsedJson = parseModelResponse(rawContent);
     
-    return {
-      urgency: parsedJson.urgency && parsedJson.urgency.trim() !== '' ? parsedJson.urgency.trim() : null,
-      importance: parsedJson.importance && parsedJson.importance.trim() !== '' ? parsedJson.importance.trim() : null
-    };
+    // Apply type safety checks to ensure we get string values or null
+    let urgency = null;
+    if (parsedJson.urgency) {
+      // Ensure urgency is a string
+      if (typeof parsedJson.urgency === 'string') {
+        urgency = parsedJson.urgency.trim() !== '' ? parsedJson.urgency.trim() : null;
+      } else {
+        // Convert non-string values to strings or null
+        urgency = parsedJson.urgency !== null && parsedJson.urgency !== undefined ? 
+          String(parsedJson.urgency).trim() : null;
+      }
+    }
+    
+    let importance = null;
+    if (parsedJson.importance) {
+      // Ensure importance is a string
+      if (typeof parsedJson.importance === 'string') {
+        importance = parsedJson.importance.trim() !== '' ? parsedJson.importance.trim() : null;
+      } else {
+        // Convert non-string values to strings or null
+        importance = parsedJson.importance !== null && parsedJson.importance !== undefined ? 
+          String(parsedJson.importance).trim() : null;
+      }
+    }
+    
+    return { urgency, importance };
   } catch (error) {
     // Special handling for rate limit errors (429 status)
     if (error.response && error.response.status === 429) {
