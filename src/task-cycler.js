@@ -11,7 +11,7 @@ const { getAllOpenIssues, getIssuesWithLabel } = require('./github-api');
 const config = require('../config');
 
 // Check if we're in test mode (using TEST_REPO environment variable)
-const isTestMode = process.env.TEST_REPO === 'true';
+const isTestMode = () => process.env.TEST_REPO === 'true';
 
 /**
  * Selects the next GitHub issue based on priority rules
