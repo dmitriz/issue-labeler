@@ -8,7 +8,7 @@
     "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
     
-    "test": "npm run test:all",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
     "test:unit": "cross-env NODE_ENV=test mocha \"src/**/*.test.js\"",
     
     "test:integration": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha \"test-integration/**/*.test.js\"",
@@ -19,9 +19,7 @@
     
     "test:models": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha \"test-models/**/*.test.js\"",
     "test:models:real": "echo \"⚠️  Warning: This will hit the real GitHub Models API\" && cross-env NODE_ENV=test mocha \"test-models/**/*.test.js\"",
-    
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
-    
+        
     "test:dev": "cross-env NODE_ENV=test USE_MOCK_RESPONSE=true mocha --watch \"src/**/*.test.js\"",
     "test:ci": "npm run test:unit && npm run test:integration && npm run test:models",
     
