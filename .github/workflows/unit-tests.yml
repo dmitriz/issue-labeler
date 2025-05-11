@@ -55,6 +55,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         
     - name: Run model tests with mock
-      run: npm run test:models:mock
+      run: npm run test:models
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
