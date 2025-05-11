@@ -9,6 +9,9 @@ const { callModel } = require('./github-model');
 const fs = require('fs');
 const path = require('path');
 
+// Sanitize output to prevent terminal escape sequence injection
+const sanitizeOutput = str => str ? str.replace(/[\n\r\v\f\b\0]/g, '') : '';
+
 // Path to the prompt template
 const promptTemplatePath = path.join(__dirname, '../prompt-template.txt');
 
@@ -46,7 +49,9 @@ async function getPromptTemplate() {
  * @returns {Promise<Object>} Result object indicating success, applied labels, or reason for skipping or failure.
  */
 async function processIssue(issue, { owner, repo, promptTemplate }) {
-  console.log(`Processing issue #${issue.number}: "${issue.title}"`);
+  // Sanitize output to prevent terminal escape sequence injection
+  const sanitizeOutput = str => str ? str.replace(/[\n\r\v\f\b\0]/g, '') : '';
+  console.log(`Processing issue #${issue.number}: "${sanitizeOutput(issue.title)}"`);
   
   try {
     // Use provided promptTemplate or load it if not provided
@@ -59,7 +64,7 @@ async function processIssue(issue, { owner, repo, promptTemplate }) {
     
     // Prepare the prompt by replacing the placeholders with actual issue content
     const prompt = template
-      .replace('{{title}}', issue.title)
+      .replace('{{title}}', sanitizeOutput(issue.title))
       .replace('{{body}}', issue.body || '');
     
     // Call the GitHub Model API individually for this issue
@@ -186,7 +191,7 @@ async function labelIssueByNumber({ issueNumber, owner, repo }) {
     // Fetch issue content from GitHub
     console.log(`Fetching content for issue #${issueNumber}...`);
     const issue = await getIssueContent({ issueNumber, owner, repo });
-    console.log(`Issue #${issue.number} fetched: "${issue.title}"`);
+    console.log(`Issue #${issue.number} fetched: "${sanitizeOutput(issue.title)}"`);
     
     // Process the issue using our main function
     return await processIssue(issue, { owner, repo });

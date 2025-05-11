@@ -40,11 +40,15 @@ async function selectNext() {
   );
   
   const top = sortedIssues[0];
+  
+  // Sanitize output to prevent terminal escape sequence injection
+  const sanitizeOutput = str => str ? str.replace(/[\n\r\v\f\b\0]/g, '') : '';
+  
   console.log(`\nSelected issue (oldest updated):`);
-  console.log(`#${top.number}: ${top.title}`);
-  console.log(`URL: ${top.html_url}`);
+  console.log(`#${top.number}: ${sanitizeOutput(top.title)}`);
+  console.log(`URL: ${sanitizeOutput(top.html_url)}`);
   console.log(`Last updated: ${new Date(top.updated_at).toLocaleString()}`);
-  console.log(`Labels: ${top.labels.map(l => l.name).join(', ') || 'none'}`);
+  console.log(`Labels: ${top.labels.map(l => sanitizeOutput(l.name)).join(', ') || 'none'}`);
 }
 
 selectNext().catch(err => {

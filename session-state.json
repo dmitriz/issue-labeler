@@ -1,4 +1,7 @@
 {
   "mode": "break",
-  "lastBreakIndex": 4
+  "currentIssueNumber": 123,
+  "lastBreakActivity": 2,
+  "lastBreakIndex": 2,
+  "startTime": 1746973510014
 }
