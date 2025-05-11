@@ -1,11 +1,9 @@
 const { getAllOpenIssues, getIssuesWithLabel } = require('./github-api');
 
 /**
- * Select the next issue to work on based on priority rules:
- * 1. Filter by urgent label if available
- * 2. From resulting list, filter by important label if available
- * 3. Pick the issue with the oldest update date from final list
- * 4. If no open issues, show appropriate message
+ * Selects the next GitHub issue to work on by prioritizing issues labeled "urgent" and "important", then choosing the one with the oldest update date.
+ *
+ * If no open issues are found, logs a message and exits. Otherwise, filters for "urgent" issues first, then "important" issues within that set, and finally selects the oldest updated issue from the filtered list.
  */
 async function selectNext() {
   // Get all open issues
