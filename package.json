@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "This tool automatically suggests urgency and importance labels for GitHub issues using a lightweight prompt-based script. It will be extended to use GitHub Models API.",
   "scripts": {
-    "start": "node src/select-next.js",
+    "start": "node src/task-cycler.js",
     "label-issue": "node src/label-issue.js",
     "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
+    "cycle": "npm start",
+    "debug-cycle": "node scripts/debug-task-cycler.js",
+    "test:task-cycler": "node scripts/run-task-cycler-tests.js",
     
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
     "test:unit": "cross-env NODE_ENV=test mocha \"src/**/*.test.js\"",
@@ -24,7 +27,8 @@
     "test:ci": "npm run test:unit && npm run test:integration && npm run test:models",
     
     "env:toggle": "node scripts/toggle-env.js",
-    "env:status": "node scripts/test-config.js"
+    "env:status": "node scripts/test-config.js",
+    "test-mode": "cross-env TEST_REPO=true node src/task-cycler.js"
   },
   "repository": {
     "type": "git",
