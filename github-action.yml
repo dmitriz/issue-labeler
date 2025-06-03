@@ -1,0 +1,24 @@
+name: 'AI Issue Labeler'
+description: 'Automatically label GitHub issues using AI with custom GPT evaluation'
+author: 'dmitriz'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  custom-gpt-mode:
+    description: 'Use custom GPT evaluation framework'
+    required: false
+    default: 'true'
+  evaluation-threshold:
+    description: 'Quality threshold for labeling (0-100)'
+    required: false
+    default: '85'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'tag'
+  color: 'blue'
