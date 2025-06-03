@@ -24,7 +24,9 @@
     "test:ci": "npm run test:unit && npm run test:integration && npm run test:models",
     
     "env:toggle": "node scripts/toggle-env.js",
-    "env:status": "node scripts/test-config.js"
+    "env:status": "node scripts/test-config.js",
+    "build-action": "ncc build github-action-main.js -o dist",
+    "test:custom-gpt": "cross-env NODE_ENV=test mocha \"src/custom-gpt-evaluator.test.js\""
   },
   "repository": {
     "type": "git",
