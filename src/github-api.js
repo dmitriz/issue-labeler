@@ -650,6 +650,63 @@ function getCurrentRepositoryInfo() {
 }
 
 /**
+ * Searches GitHub repositories based on a query string.
+ *
+ * @param {Object} params - Search parameters.
+ * @param {string} params.query - The search query (e.g., 'trading', 'topic:trading', 'user:username trading').
+ * @param {string} [params.sort] - Sort field: 'stars', 'forks', 'updated'. Defaults to 'stars'.
+ * @param {string} [params.order] - Sort order: 'asc' or 'desc'. Defaults to 'desc'.
+ * @param {number} [params.per_page] - Number of results per page. Defaults to 30, max 100.
+ * @param {number} [params.page] - Page number to retrieve. Defaults to 1.
+ * @returns {Promise<Object>} Promise resolving to search results with items array and metadata.
+ *
+ * @throws {Error} If required parameters are missing or invalid.
+ */
+async function searchRepositories({
+  query,
+  sort = 'stars',
+  order = 'desc',
+  per_page = 30,
+  page = 1
+} = {}) {
+  // Validate required parameters
+  if (!query || typeof query !== 'string') {
+    throw new Error('Parameter "query" is required and must be a string');
+  }
+  
+  // Validate optional parameters
+  if (sort && !['stars', 'forks', 'updated', 'help-wanted-issues'].includes(sort)) {
+    throw new Error('Parameter "sort" must be one of: stars, forks, updated, help-wanted-issues');
+  }
+  
+  if (order && !['asc', 'desc'].includes(order)) {
+    throw new Error('Parameter "order" must be one of: asc, desc');
+  }
+  
+  const params = {
+    q: query,
+    sort,
+    order,
+    per_page: Math.min(per_page, 100),
+    page
+  };
+  
+  try {
+    console.log(`Searching repositories with query: "${query}"...`);
+    const response = await githubClient.get('/search/repositories', { params });
+    
+    console.log(`Found ${response.data.total_count} repositories (showing page ${page})`);
+    return {
+      total_count: response.data.total_count,
+      incomplete_results: response.data.incomplete_results,
+      items: response.data.items
+    };
+  } catch (error) {
+    return handleGitHubError(error, `searching repositories with query "${query}"`);
+  }
+}
+
+/**
  * Executes an asynchronous function with automatic retries using exponential backoff and jitter.
  *
  * @param {Function} fn - The asynchronous function to execute.
@@ -693,6 +750,9 @@ module.exports = {
   getAllOpenIssues,
   getIssuesWithLabel,
   getCurrentRepositoryInfo,
+  
+  // Repository search operations
+  searchRepositories,
   
   // Backward compatibility functions
   addLabelsToIssue: addLabels,  // Alias for compatibility with old scripts
