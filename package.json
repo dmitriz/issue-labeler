@@ -7,6 +7,7 @@
     "label-issue": "node src/label-issue.js",
     "label-all-issues": "node src/label-all-issues.js",
     "select-next": "node src/select-next.js",
+    "find-var": "node src/find-variable.js",
     
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:models",
     "test:unit": "cross-env NODE_ENV=test mocha \"src/**/*.test.js\"",
