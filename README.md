@@ -8,6 +8,7 @@ A tool that automatically assigns labels (urgency and importance) to GitHub issu
 - Support for urgency and importance categorization
 - Command-line interface for labeling specific issues
 - Utility for selecting the next issue to work on based on priority
+- Variable finder utility for searching JavaScript codebases
 
 ## Installation
 
@@ -42,6 +43,20 @@ Where `123` is the issue number you want to label.
 ```bash
 npm run select-next
 ```
+
+### Find variable declarations in the codebase
+
+```bash
+npm run find-var <variable-name>
+```
+
+For example, to find all declarations of variable 'r':
+
+```bash
+npm run find-var r
+```
+
+See [docs/find-variable.md](./docs/find-variable.md) for more details.
 
 ## Project Structure
 
