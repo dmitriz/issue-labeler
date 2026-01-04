@@ -8,6 +8,15 @@ const fs = require('fs');
 const path = require('path');
 
 /**
+ * Escapes special regex characters in a string
+ * @param {string} string - The string to escape
+ * @returns {string} The escaped string safe for use in regex
+ */
+function escapeRegex(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Search for a specific variable name in JavaScript files
  * @param {string} varName - The variable name to search for
  * @param {string} searchDir - The directory to search in
@@ -17,13 +26,15 @@ function findVariable(varName, searchDir = '.') {
   const results = [];
   const jsFiles = findJavaScriptFiles(searchDir);
   
+  // Escape special regex characters in the variable name
+  const escapedVarName = escapeRegex(varName);
+  
   // Create regex patterns to match various declaration types
   const patterns = [
-    new RegExp(`^\\s*(const|let|var)\\s+${varName}\\s*[=;]`, 'm'),  // Variable declarations
-    new RegExp(`^\\s*function\\s+${varName}\\s*\\(`, 'm'),          // Function declarations
-    new RegExp(`\\b${varName}\\s*:\\s*`, 'm'),                       // Object property
-    new RegExp(`^\\s*${varName}\\s*\\(`, 'm'),                       // Method shorthand
-    new RegExp(`^\\s*class\\s+${varName}\\s*`, 'm'),                 // Class declarations
+    new RegExp(`^\\s*(const|let|var)\\s+${escapedVarName}\\s*[=;]`, 'm'),  // Variable declarations
+    new RegExp(`^\\s*function\\s+${escapedVarName}\\s*\\(`, 'm'),          // Function declarations
+    new RegExp(`\\b${escapedVarName}\\s*:\\s*`, 'm'),                       // Object property
+    new RegExp(`^\\s*class\\s+${escapedVarName}\\s*`, 'm'),                 // Class declarations
   ];
   
   for (const filePath of jsFiles) {
@@ -126,4 +137,4 @@ if (require.main === module) {
   displayResults(results, varName);
 }
 
-module.exports = { findVariable, findJavaScriptFiles, displayResults };
+module.exports = { findVariable, findJavaScriptFiles, displayResults, escapeRegex };

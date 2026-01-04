@@ -5,7 +5,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const { findVariable, findJavaScriptFiles } = require('./find-variable');
+const { findVariable, findJavaScriptFiles, escapeRegex } = require('./find-variable');
 
 describe('findVariable', () => {
   const testDir = path.join(__dirname, '..', 'test-fixtures', 'find-variable-test');
@@ -56,6 +56,42 @@ const obj = { r: 10 };
   it('should return empty array for non-existent variable', () => {
     const results = findVariable('nonExistentVar', testDir);
     assert.strictEqual(results.length, 0, 'Should return empty array');
+  });
+  
+  it('should handle special regex characters in variable names', () => {
+    // Create a test file with a variable containing regex special chars
+    const specialTestDir = path.join(testDir, 'special');
+    if (!fs.existsSync(specialTestDir)) {
+      fs.mkdirSync(specialTestDir, { recursive: true });
+    }
+    
+    fs.writeFileSync(
+      path.join(specialTestDir, 'special-vars.js'),
+      `const $myVar = 42;
+const my_var = 'test';
+`
+    );
+    
+    const results = findVariable('$myVar', specialTestDir);
+    assert.ok(results.length > 0, 'Should find variables with special characters');
+    
+    // Cleanup
+    fs.rmSync(specialTestDir, { recursive: true, force: true });
+  });
+});
+
+describe('escapeRegex', () => {
+  it('should escape special regex characters', () => {
+    assert.strictEqual(escapeRegex('test.var'), 'test\\.var');
+    assert.strictEqual(escapeRegex('my*var'), 'my\\*var');
+    assert.strictEqual(escapeRegex('var+1'), 'var\\+1');
+    assert.strictEqual(escapeRegex('var?'), 'var\\?');
+    assert.strictEqual(escapeRegex('$myVar'), '\\$myVar');
+  });
+  
+  it('should not modify strings without special characters', () => {
+    assert.strictEqual(escapeRegex('myVariable'), 'myVariable');
+    assert.strictEqual(escapeRegex('my_var'), 'my_var');
   });
 });
 
