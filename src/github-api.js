@@ -675,8 +675,8 @@ async function searchRepositories({
   }
   
   // Validate optional parameters
-  if (sort && !['stars', 'forks', 'updated', 'help-wanted-issues'].includes(sort)) {
-    throw new Error('Parameter "sort" must be one of: stars, forks, updated, help-wanted-issues');
+  if (sort && !['stars', 'forks', 'updated'].includes(sort)) {
+    throw new Error('Parameter "sort" must be one of: stars, forks, updated');
   }
   
   if (order && !['asc', 'desc'].includes(order)) {
