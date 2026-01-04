@@ -8,6 +8,7 @@ A tool that automatically assigns labels (urgency and importance) to GitHub issu
 - Support for urgency and importance categorization
 - Command-line interface for labeling specific issues
 - Utility for selecting the next issue to work on based on priority
+- Repository search functionality to find GitHub repositories by topic or keyword
 
 ## Installation
 
@@ -42,6 +43,34 @@ Where `123` is the issue number you want to label.
 ```bash
 npm run select-next
 ```
+
+### Search for repositories
+
+Search GitHub repositories by topic or keyword:
+
+```bash
+# Search for trading-related repositories
+npm run search-repos
+
+# Search with custom query
+npm run search-repos -- --query "trading bot"
+
+# Search repositories by a specific user
+npm run search-repos -- --query trading --user dmitriz
+
+# Limit results and sort by forks
+npm run search-repos -- --query finance --limit 20 --sort forks
+
+# Show help
+npm run search-repos -- --help
+```
+
+Available options for repository search:
+- `-q, --query <text>` - Search query (default: "trading")
+- `-u, --user <username>` - Filter by GitHub username
+- `-l, --limit <number>` - Maximum number of results (default: 10)
+- `-s, --sort <field>` - Sort by: stars, forks, updated (default: stars)
+- `-h, --help` - Show help message
 
 ## Project Structure
 
