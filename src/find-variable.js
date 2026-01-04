@@ -49,7 +49,7 @@ function findVariable(varName, searchDir = '.') {
               file: filePath,
               line: index + 1,
               content: line.trim(),
-              type: getDeclarationType(line, varName)
+              type: getDeclarationType(line)
             });
             break;
           }
@@ -66,10 +66,9 @@ function findVariable(varName, searchDir = '.') {
 /**
  * Determine the type of declaration from the line content
  * @param {string} line - The line of code
- * @param {string} varName - The variable name
  * @returns {string} The type of declaration
  */
-function getDeclarationType(line, varName) {
+function getDeclarationType(line) {
   if (line.match(/^\s*(const|let|var)/)) return 'variable';
   if (line.match(/^\s*function/)) return 'function';
   if (line.match(/^\s*class/)) return 'class';
